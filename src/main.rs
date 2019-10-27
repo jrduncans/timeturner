@@ -11,8 +11,8 @@ struct Opt {
 fn main() {
     let opt = Opt::from_args();
 
-    timeturner::run(opt.input).unwrap_or_else(|err| {
+    if let Err(err) = timeturner::run(opt.input) {
         eprintln!("{}", err);
         process::exit(1);
-    });
+    }
 }
