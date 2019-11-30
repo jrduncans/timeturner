@@ -3,8 +3,8 @@ name = "timeturner"
 version = "0.1.0"
 authors = ["Stephen Duncan <jrduncans@users.noreply.github.com>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "MIT OR Apache-2.0"
+description = "Command line utility for manipulating date-time strings"
 
 [dependencies]
 structopt = "0.3"

@@ -58,6 +58,10 @@ fn parse_input(input: Option<String>) -> Result<ParsedInput, &'static str> {
         })
 }
 
+/// Takes an optional input and prints conversions to different date-time formats.
+/// If an input string is not given, then `now` is used.
+/// If the input format cannot be handled, a string suitable for display to the user
+/// is given as the error result.
 pub fn run(input: Option<String>) -> Result<(), &'static str> {
     let parsed_input = parse_input(input)?;
 
