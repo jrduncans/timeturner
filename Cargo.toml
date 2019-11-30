@@ -6,6 +6,9 @@ edition = "2018"
 license = "MIT OR Apache-2.0"
 description = "Command line utility for manipulating date-time strings"
 repository = "https://github.com/jrduncans/timeturner"
+readme = "README.md"
+categories = ["command-line-utilities", "date-and-time", "value-formatting"]
+maintenance = { status = "experimental" }
 
 [dependencies]
 structopt = "0.3"
