@@ -47,7 +47,7 @@ fn parse_input(input: Option<String>) -> Result<ParsedInput, &'static str> {
         .map(|i| {
             DateTimeFormat::EpochMillis
                 .parse(&i)
-                .or(DateTimeFormat::Rfc3339.parse(&i))
+                .or_else(|| DateTimeFormat::Rfc3339.parse(&i))
                 .ok_or("Input format not recognized")
         })
         .unwrap_or_else(|| {

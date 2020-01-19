@@ -8,6 +8,8 @@ description = "Command line utility for manipulating date-time strings"
 repository = "https://github.com/jrduncans/timeturner"
 readme = "README.md"
 categories = ["command-line-utilities", "date-and-time", "value-formatting"]
+
+[badges]
 maintenance = { status = "experimental" }
 
 [dependencies]
