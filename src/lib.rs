@@ -11,11 +11,22 @@ pub fn run(input: Option<String>) -> Result<(), &'static str> {
     let parsed_input = crate::parsing::parse_input(input)?;
 
     if parsed_input.input_zone != Some(FixedOffset::west(0)) {
-        println!("{}", parsed_input.value.to_rfc3339_opts(SecondsFormat::Millis, true));
+        println!(
+            "{}",
+            parsed_input
+                .value
+                .to_rfc3339_opts(SecondsFormat::Millis, true)
+        );
     }
 
     if parsed_input.input_zone != Some(parsed_input.value.with_timezone(&Local).offset().fix()) {
-        println!("{}", parsed_input.value.with_timezone(&Local).to_rfc3339_opts(SecondsFormat::Millis, true));
+        println!(
+            "{}",
+            parsed_input
+                .value
+                .with_timezone(&Local)
+                .to_rfc3339_opts(SecondsFormat::Millis, true)
+        );
     }
 
     if parsed_input.input_format != DateTimeFormat::EpochMillis {

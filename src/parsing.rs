@@ -66,7 +66,7 @@ pub fn parse_input(input: Option<String>) -> Result<ParsedInput, &'static str> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn missing_input() {
         let now = Utc::now();
