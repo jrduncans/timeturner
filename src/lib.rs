@@ -1,7 +1,5 @@
+mod converting;
 mod parsing;
-
-use chrono::prelude::*;
-use parsing::DateTimeFormat;
 
 /// Takes an optional input and prints conversions to different date-time formats.
 /// If an input string is not given, then `now` is used.
@@ -9,28 +7,10 @@ use parsing::DateTimeFormat;
 /// is given as the error result.
 pub fn run(input: Option<String>) -> Result<(), &'static str> {
     let parsed_input = crate::parsing::parse_input(input)?;
+    let conversion_results = crate::converting::convert(parsed_input);
 
-    if parsed_input.input_zone != Some(FixedOffset::west(0)) {
-        println!(
-            "{}",
-            parsed_input
-                .value
-                .to_rfc3339_opts(SecondsFormat::Millis, true)
-        );
-    }
-
-    if parsed_input.input_zone != Some(parsed_input.value.with_timezone(&Local).offset().fix()) {
-        println!(
-            "{}",
-            parsed_input
-                .value
-                .with_timezone(&Local)
-                .to_rfc3339_opts(SecondsFormat::Millis, true)
-        );
-    }
-
-    if parsed_input.input_format != DateTimeFormat::EpochMillis {
-        println!("{}", parsed_input.value.timestamp_millis());
+    for conversion_result in &conversion_results {
+        println!("{}", conversion_result.converted_text);
     }
 
     Ok(())
