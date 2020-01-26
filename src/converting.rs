@@ -37,7 +37,7 @@ pub fn convert(parsed_input: ParsedInput) -> Vec<ConversionResult> {
 
     if parsed_input.input_format != DateTimeFormat::EpochMillis {
         results.push(ConversionResult {
-            converted_text: format!("{}", parsed_input.value.timestamp_millis()),
+            converted_text: parsed_input.value.timestamp_millis().to_string(),
             format: ConversionFormat::EpochMillis,
         });
     }
