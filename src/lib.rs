@@ -1,73 +1,79 @@
-use chrono::prelude::*;
+mod parsing {
+    use chrono::prelude::*;
 
-#[derive(PartialEq, Debug)]
-enum DateTimeFormat {
-    Missing,
-    EpochMillis,
-    Rfc3339,
-}
+    #[derive(PartialEq, Debug)]
+    pub enum DateTimeFormat {
+        Missing,
+        EpochMillis,
+        Rfc3339,
+    }
 
-struct ParsedInput {
-    input_format: DateTimeFormat,
-    input_zone: Option<FixedOffset>,
-    value: DateTime<Utc>,
-}
-
-impl DateTimeFormat {
-    fn parse(&self, input: &str) -> Option<ParsedInput> {
-        match self {
-            DateTimeFormat::EpochMillis => parse_from_epoch_millis(input),
-            DateTimeFormat::Rfc3339 => parse_from_rfc3339(input),
-            DateTimeFormat::Missing => None,
+    impl DateTimeFormat {
+        fn parse(&self, input: &str) -> Option<ParsedInput> {
+            match self {
+                DateTimeFormat::EpochMillis => parse_from_epoch_millis(input),
+                DateTimeFormat::Rfc3339 => parse_from_rfc3339(input),
+                DateTimeFormat::Missing => None,
+            }
         }
+    }
+
+    #[derive(PartialEq, Debug)]
+    pub struct ParsedInput {
+        pub input_format: DateTimeFormat,
+        pub input_zone: Option<FixedOffset>,
+        pub value: DateTime<Utc>,
+    }
+
+    fn parse_from_epoch_millis(input: &str) -> Option<ParsedInput> {
+        input
+            .parse::<i64>()
+            .ok()
+            .and_then(|e| Utc.timestamp_millis_opt(e).single())
+            .map(|d| ParsedInput {
+                input_format: DateTimeFormat::EpochMillis,
+                input_zone: None,
+                value: d,
+            })
+    }
+
+    fn parse_from_rfc3339(input: &str) -> Option<ParsedInput> {
+        DateTime::parse_from_rfc3339(&input.replace(" ", "T"))
+            .ok()
+            .map(|d| ParsedInput {
+                input_format: DateTimeFormat::Rfc3339,
+                input_zone: Some(d.timezone()),
+                value: d.with_timezone(&Utc),
+            })
+    }
+
+    pub fn parse_input(input: Option<String>) -> Result<ParsedInput, &'static str> {
+        input
+            .map(|i| {
+                DateTimeFormat::EpochMillis
+                    .parse(&i)
+                    .or_else(|| DateTimeFormat::Rfc3339.parse(&i))
+                    .ok_or("Input format not recognized")
+            })
+            .unwrap_or_else(|| {
+                Ok(ParsedInput {
+                    input_format: DateTimeFormat::Missing,
+                    input_zone: None,
+                    value: Utc::now(),
+                })
+            })
     }
 }
 
-fn parse_from_epoch_millis(input: &str) -> Option<ParsedInput> {
-    input
-        .parse::<i64>()
-        .ok()
-        .and_then(|e| Utc.timestamp_millis_opt(e).single())
-        .map(|d| ParsedInput {
-            input_format: DateTimeFormat::EpochMillis,
-            input_zone: None,
-            value: d,
-        })
-}
-
-fn parse_from_rfc3339(input: &str) -> Option<ParsedInput> {
-    DateTime::parse_from_rfc3339(&input.replace(" ", "T"))
-        .ok()
-        .map(|d| ParsedInput {
-            input_format: DateTimeFormat::Rfc3339,
-            input_zone: Some(d.timezone()),
-            value: d.with_timezone(&Utc),
-        })
-}
-
-fn parse_input(input: Option<String>) -> Result<ParsedInput, &'static str> {
-    input
-        .map(|i| {
-            DateTimeFormat::EpochMillis
-                .parse(&i)
-                .or_else(|| DateTimeFormat::Rfc3339.parse(&i))
-                .ok_or("Input format not recognized")
-        })
-        .unwrap_or_else(|| {
-            Ok(ParsedInput {
-                input_format: DateTimeFormat::Missing,
-                input_zone: None,
-                value: Utc::now(),
-            })
-        })
-}
+use chrono::prelude::*;
+use parsing::DateTimeFormat;
 
 /// Takes an optional input and prints conversions to different date-time formats.
 /// If an input string is not given, then `now` is used.
 /// If the input format cannot be handled, a string suitable for display to the user
 /// is given as the error result.
 pub fn run(input: Option<String>) -> Result<(), &'static str> {
-    let parsed_input = parse_input(input)?;
+    let parsed_input = parsing::parse_input(input)?;
 
     if parsed_input.input_zone != Some(FixedOffset::west(0)) {
         println!("{}", parsed_input.value.to_rfc3339_opts(SecondsFormat::Millis, true));
@@ -87,6 +93,7 @@ pub fn run(input: Option<String>) -> Result<(), &'static str> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use super::parsing::*;
 
     #[test]
     fn missing_input() {
