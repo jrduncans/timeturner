@@ -7,6 +7,7 @@ struct Item {
     uid: String,
     title: String,
     subtitle: String,
+    arg: String,
 }
 
 #[derive(Serialize)]
@@ -29,6 +30,7 @@ pub fn output_alfred(conversion_results: &[ConversionResult]) -> String {
                 ConversionFormat::Rfc3339Local => String::from("RFC3339 - Local"),
                 ConversionFormat::EpochMillis => String::from("Epoch Millis"),
             },
+            arg: conversion_result.converted_text.clone(),
         })
         .collect();
 

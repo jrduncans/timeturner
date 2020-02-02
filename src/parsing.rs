@@ -71,7 +71,7 @@ mod tests {
     #[test]
     fn missing_input() {
         let now = Utc::now();
-        let result = parse_input(None).unwrap();
+        let result = parse_input(&None).unwrap();
         assert_eq!(result.input_format, crate::parsing::DateTimeFormat::Missing);
         assert_eq!(result.input_zone, None);
         assert!(
@@ -91,7 +91,7 @@ mod tests {
 
     #[test]
     fn epoch_millis_input() {
-        let result = parse_input(Some(String::from("1572213799747"))).unwrap();
+        let result = parse_input(&Some(String::from("1572213799747"))).unwrap();
         assert_eq!(result.input_format, DateTimeFormat::EpochMillis);
         assert_eq!(result.input_zone, None);
         assert_eq!(result.value, Utc.timestamp_millis(1572213799747));
@@ -99,7 +99,7 @@ mod tests {
 
     #[test]
     fn rfc3339_input() {
-        let result = parse_input(Some(String::from("2019-10-27T15:03:19.747-07:00"))).unwrap();
+        let result = parse_input(&Some(String::from("2019-10-27T15:03:19.747-07:00"))).unwrap();
         assert_eq!(result.input_format, DateTimeFormat::Rfc3339);
         assert_eq!(result.input_zone, Some(FixedOffset::west(25200)));
         assert_eq!(result.value, Utc.timestamp_millis(1572213799747));
@@ -107,7 +107,7 @@ mod tests {
 
     #[test]
     fn rfc3339_input_no_partial_seconds() {
-        let result = parse_input(Some(String::from("2019-10-27T15:03:19-07:00"))).unwrap();
+        let result = parse_input(&Some(String::from("2019-10-27T15:03:19-07:00"))).unwrap();
         assert_eq!(result.input_format, DateTimeFormat::Rfc3339);
         assert_eq!(result.input_zone, Some(FixedOffset::west(25200)));
         assert_eq!(result.value, Utc.timestamp_millis(1572213799000));
@@ -115,7 +115,7 @@ mod tests {
 
     #[test]
     fn rfc3339_input_zulu() {
-        let result = parse_input(Some(String::from("2019-10-27T22:03:19.747Z"))).unwrap();
+        let result = parse_input(&Some(String::from("2019-10-27T22:03:19.747Z"))).unwrap();
         assert_eq!(result.input_format, DateTimeFormat::Rfc3339);
         assert_eq!(result.input_zone, Some(FixedOffset::west(0)));
         assert_eq!(result.value, Utc.timestamp_millis(1572213799747));
@@ -123,7 +123,7 @@ mod tests {
 
     #[test]
     fn rfc3339_input_space_instead_of_t() {
-        let result = parse_input(Some(String::from("2019-10-27 15:03:19.747-07:00"))).unwrap();
+        let result = parse_input(&Some(String::from("2019-10-27 15:03:19.747-07:00"))).unwrap();
         assert_eq!(result.input_format, DateTimeFormat::Rfc3339);
         assert_eq!(result.input_zone, Some(FixedOffset::west(25200)));
         assert_eq!(result.value, Utc.timestamp_millis(1572213799747));
@@ -131,7 +131,7 @@ mod tests {
 
     #[test]
     fn invalid_input() {
-        let result = parse_input(Some(String::from("not a date"))).err();
+        let result = parse_input(&Some(String::from("not a date"))).err();
         assert_eq!(result, Some("Input format not recognized"));
     }
 }
