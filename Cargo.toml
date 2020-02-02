@@ -1,18 +1,21 @@
 [package]
 name = "timeturner"
-version = "0.2.0"
+version = "1.0.0"
 authors = ["Stephen Duncan <jrduncans@users.noreply.github.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
 description = "Command line utility for manipulating date-time strings"
 repository = "https://github.com/jrduncans/timeturner"
 readme = "README.md"
+keywords = ["epoch", "RFC3339", "format", "dates", "alfred"]
 categories = ["command-line-utilities", "date-and-time", "value-formatting"]
 
 [badges]
-maintenance = { status = "experimental" }
+maintenance = { status = "actively-developed" }
 
 [dependencies]
 structopt = "0.3"
 chrono = "0.4"
 chrono-tz = "0.5"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"

@@ -46,8 +46,9 @@ fn parse_from_rfc3339(input: &str) -> Option<ParsedInput> {
         })
 }
 
-pub fn parse_input(input: Option<String>) -> Result<ParsedInput, &'static str> {
+pub fn parse_input(input: &Option<String>) -> Result<ParsedInput, &'static str> {
     input
+        .as_ref()
         .map(|i| {
             DateTimeFormat::EpochMillis
                 .parse(&i)
