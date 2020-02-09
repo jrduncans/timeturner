@@ -5,14 +5,22 @@ pub enum DateTimeFormat {
     Missing,
     EpochMillis,
     Rfc3339,
+    DBYHMS,
+    DBYHMSComma,
 }
 
 impl DateTimeFormat {
     fn parse(&self, input: &str) -> Option<ParsedInput> {
         match self {
+            DateTimeFormat::Missing => None,
             DateTimeFormat::EpochMillis => parse_from_epoch_millis(input),
             DateTimeFormat::Rfc3339 => parse_from_rfc3339(input),
-            DateTimeFormat::Missing => None,
+            DateTimeFormat::DBYHMS => {
+                parse_from_format(input, "%d %b %Y %H:%M:%S%.3f", DateTimeFormat::DBYHMS)
+            }
+            DateTimeFormat::DBYHMSComma => {
+                parse_from_format(input, "%d %b %Y %H:%M:%S,%3f", DateTimeFormat::DBYHMSComma)
+            }
         }
     }
 }
@@ -46,6 +54,20 @@ fn parse_from_rfc3339(input: &str) -> Option<ParsedInput> {
         })
 }
 
+fn parse_from_format(
+    input: &str,
+    format: &str,
+    date_time_format: DateTimeFormat,
+) -> Option<ParsedInput> {
+    Utc.datetime_from_str(input, format)
+        .ok()
+        .map(|d| ParsedInput {
+            input_format: date_time_format,
+            input_zone: None,
+            value: d.with_timezone(&Utc),
+        })
+}
+
 pub fn parse_input(input: &Option<String>) -> Result<ParsedInput, &'static str> {
     input
         .as_ref()
@@ -53,6 +75,8 @@ pub fn parse_input(input: &Option<String>) -> Result<ParsedInput, &'static str> 
             DateTimeFormat::EpochMillis
                 .parse(&i)
                 .or_else(|| DateTimeFormat::Rfc3339.parse(&i))
+                .or_else(|| DateTimeFormat::DBYHMS.parse(&i))
+                .or_else(|| DateTimeFormat::DBYHMSComma.parse(&i))
                 .ok_or("Input format not recognized")
         })
         .unwrap_or_else(|| {
@@ -127,6 +151,22 @@ mod tests {
         assert_eq!(result.input_format, DateTimeFormat::Rfc3339);
         assert_eq!(result.input_zone, Some(FixedOffset::west(25200)));
         assert_eq!(result.value, Utc.timestamp_millis(1572213799747));
+    }
+
+    #[test]
+    fn date_spelled_short_month_time_with_dot_input() {
+        let result = parse_input(&Some(String::from("03 Feb 2020 01:03:10.534"))).unwrap();
+        assert_eq!(result.input_format, DateTimeFormat::DBYHMS);
+        assert_eq!(result.input_zone, None);
+        assert_eq!(result.value, Utc.timestamp_millis(1580691790534));
+    }
+
+    #[test]
+    fn date_spelled_short_month_time_with_comma_input() {
+        let result = parse_input(&Some(String::from("03 Feb 2020 01:03:10,534"))).unwrap();
+        assert_eq!(result.input_format, DateTimeFormat::DBYHMSComma);
+        assert_eq!(result.input_zone, None);
+        assert_eq!(result.value, Utc.timestamp_millis(1580691790534));
     }
 
     #[test]
