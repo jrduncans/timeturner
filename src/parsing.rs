@@ -5,8 +5,7 @@ pub enum DateTimeFormat {
     Missing,
     EpochMillis,
     Rfc3339,
-    DBYHMS,
-    DBYHMSComma,
+    Custom,
 }
 
 impl DateTimeFormat {
@@ -15,12 +14,7 @@ impl DateTimeFormat {
             DateTimeFormat::Missing => None,
             DateTimeFormat::EpochMillis => parse_from_epoch_millis(input),
             DateTimeFormat::Rfc3339 => parse_from_rfc3339(input),
-            DateTimeFormat::DBYHMS => {
-                parse_from_format(input, "%d %b %Y %H:%M:%S%.3f", DateTimeFormat::DBYHMS)
-            }
-            DateTimeFormat::DBYHMSComma => {
-                parse_from_format(input, "%d %b %Y %H:%M:%S,%3f", DateTimeFormat::DBYHMSComma)
-            }
+            DateTimeFormat::Custom => parse_custom_format(input),
         }
     }
 }
@@ -54,15 +48,19 @@ fn parse_from_rfc3339(input: &str) -> Option<ParsedInput> {
         })
 }
 
-fn parse_from_format(
-    input: &str,
-    format: &str,
-    date_time_format: DateTimeFormat,
-) -> Option<ParsedInput> {
+const CUSTOM_FORMATS: [&str; 2] = ["%d %b %Y %H:%M:%S%.3f", "%d %b %Y %H:%M:%S,%3f"];
+
+fn parse_custom_format(input: &str) -> Option<ParsedInput> {
+    CUSTOM_FORMATS
+        .iter()
+        .find_map(|s| parse_from_format(input, s))
+}
+
+fn parse_from_format(input: &str, format: &str) -> Option<ParsedInput> {
     Utc.datetime_from_str(input, format)
         .ok()
         .map(|d| ParsedInput {
-            input_format: date_time_format,
+            input_format: DateTimeFormat::Custom,
             input_zone: None,
             value: d.with_timezone(&Utc),
         })
@@ -81,8 +79,7 @@ pub fn parse_input(input: &Option<String>) -> Result<ParsedInput, &'static str> 
             DateTimeFormat::EpochMillis
                 .parse(&i)
                 .or_else(|| DateTimeFormat::Rfc3339.parse(&i))
-                .or_else(|| DateTimeFormat::DBYHMS.parse(&i))
-                .or_else(|| DateTimeFormat::DBYHMSComma.parse(&i))
+                .or_else(|| DateTimeFormat::Custom.parse(&i))
                 .ok_or("Input format not recognized")
         },
     )
@@ -158,7 +155,7 @@ mod tests {
     #[test]
     fn date_spelled_short_month_time_with_dot_input() {
         let result = parse_input(&Some(String::from("03 Feb 2020 01:03:10.534"))).unwrap();
-        assert_eq!(result.input_format, DateTimeFormat::DBYHMS);
+        assert_eq!(result.input_format, DateTimeFormat::Custom);
         assert_eq!(result.input_zone, None);
         assert_eq!(result.value, Utc.timestamp_millis(1580691790534));
     }
@@ -166,7 +163,7 @@ mod tests {
     #[test]
     fn date_spelled_short_month_time_with_comma_input() {
         let result = parse_input(&Some(String::from("03 Feb 2020 01:03:10,534"))).unwrap();
-        assert_eq!(result.input_format, DateTimeFormat::DBYHMSComma);
+        assert_eq!(result.input_format, DateTimeFormat::Custom);
         assert_eq!(result.input_zone, None);
         assert_eq!(result.value, Utc.timestamp_millis(1580691790534));
     }
