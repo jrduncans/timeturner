@@ -69,23 +69,23 @@ fn parse_from_format(
 }
 
 pub fn parse_input(input: &Option<String>) -> Result<ParsedInput, &'static str> {
-    input
-        .as_ref()
-        .map(|i| {
+    input.as_ref().map_or_else(
+        || {
+            Ok(ParsedInput {
+                input_format: DateTimeFormat::Missing,
+                input_zone: None,
+                value: Utc::now(),
+            })
+        },
+        |i| {
             DateTimeFormat::EpochMillis
                 .parse(&i)
                 .or_else(|| DateTimeFormat::Rfc3339.parse(&i))
                 .or_else(|| DateTimeFormat::DBYHMS.parse(&i))
                 .or_else(|| DateTimeFormat::DBYHMSComma.parse(&i))
                 .ok_or("Input format not recognized")
-        })
-        .unwrap_or_else(|| {
-            Ok(ParsedInput {
-                input_format: DateTimeFormat::Missing,
-                input_zone: None,
-                value: Utc::now(),
-            })
-        })
+        },
+    )
 }
 
 #[cfg(test)]

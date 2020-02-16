@@ -15,7 +15,7 @@ struct Alfred {
     items: Vec<Item>,
 }
 
-pub fn output_alfred(conversion_results: &[ConversionResult]) -> String {
+pub fn output_json(conversion_results: &[ConversionResult]) -> String {
     let items: Vec<_> = conversion_results
         .iter()
         .map(|conversion_result| Item {

@@ -15,7 +15,7 @@ pub struct ConversionResult {
     pub format: ConversionFormat,
 }
 
-pub fn convert(parsed_input: ParsedInput) -> Vec<ConversionResult> {
+pub fn convert(parsed_input: &ParsedInput) -> Vec<ConversionResult> {
     let mut results = Vec::new();
 
     if parsed_input.input_zone != Some(FixedOffset::west(0)) {
@@ -56,7 +56,7 @@ mod tests {
     #[test]
     fn missing_input() {
         let date = Utc.timestamp_millis(1572213799747);
-        let result = convert(ParsedInput {
+        let result = convert(&ParsedInput {
             input_format: DateTimeFormat::Missing,
             input_zone: None,
             value: date,
@@ -87,7 +87,7 @@ mod tests {
     #[test]
     fn epoch_millis_input() {
         let date = Utc.timestamp_millis(1572213799747);
-        let result = convert(ParsedInput {
+        let result = convert(&ParsedInput {
             input_format: DateTimeFormat::EpochMillis,
             input_zone: None,
             value: date,
@@ -114,7 +114,7 @@ mod tests {
     #[test]
     fn rfc3339_utc() {
         let date = Utc.timestamp_millis(1572213799747);
-        let result = convert(ParsedInput {
+        let result = convert(&ParsedInput {
             input_format: DateTimeFormat::Rfc3339,
             input_zone: Some(FixedOffset::west(0)),
             value: date,
@@ -141,7 +141,7 @@ mod tests {
     #[test]
     fn rfc3339_offset() {
         let date = Utc.timestamp_millis(1572213799747);
-        let result = convert(ParsedInput {
+        let result = convert(&ParsedInput {
             input_format: DateTimeFormat::Rfc3339,
             input_zone: Some(date.with_timezone(&Local).offset().fix()),
             value: date,

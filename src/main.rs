@@ -15,7 +15,7 @@ struct Opt {
 fn main() {
     let opt = Opt::from_args();
 
-    if let Err(err) = timeturner::run(&opt.input, output_mode(&opt)) {
+    if let Err(err) = timeturner::run(&opt.input, &output_mode(&opt)) {
         eprintln!("{}", err);
         process::exit(1);
     }
