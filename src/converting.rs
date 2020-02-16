@@ -49,6 +49,8 @@ pub fn convert(parsed_input: ParsedInput) -> Vec<ConversionResult> {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::unreadable_literal)]
+
     use super::*;
 
     #[test]
