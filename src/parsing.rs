@@ -11,10 +11,10 @@ pub enum DateTimeFormat {
 impl DateTimeFormat {
     fn parse(&self, input: &str) -> Option<ParsedInput> {
         match self {
-            DateTimeFormat::Missing => None,
-            DateTimeFormat::EpochMillis => parse_from_epoch_millis(input),
-            DateTimeFormat::Rfc3339 => parse_from_rfc3339(input),
-            DateTimeFormat::Custom => parse_custom_format(input),
+            Self::Missing => None,
+            Self::EpochMillis => parse_from_epoch_millis(input),
+            Self::Rfc3339 => parse_from_rfc3339(input),
+            Self::Custom => parse_custom_format(input),
         }
     }
 }
@@ -77,9 +77,9 @@ pub fn parse_input(input: &Option<String>) -> Result<ParsedInput, &'static str> 
         },
         |i| {
             DateTimeFormat::EpochMillis
-                .parse(&i)
-                .or_else(|| DateTimeFormat::Rfc3339.parse(&i))
-                .or_else(|| DateTimeFormat::Custom.parse(&i))
+                .parse(i)
+                .or_else(|| DateTimeFormat::Rfc3339.parse(i))
+                .or_else(|| DateTimeFormat::Custom.parse(i))
                 .ok_or("Input format not recognized")
         },
     )
