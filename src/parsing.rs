@@ -5,7 +5,8 @@ pub enum DateTimeFormat {
     Missing,
     EpochMillis,
     Rfc3339,
-    Custom,
+    CustomUnzoned,
+    CustomZoned,
 }
 
 impl DateTimeFormat {
@@ -14,7 +15,8 @@ impl DateTimeFormat {
             Self::Missing => None,
             Self::EpochMillis => parse_from_epoch_millis(input),
             Self::Rfc3339 => parse_from_rfc3339(input),
-            Self::Custom => parse_custom_format(input),
+            Self::CustomUnzoned => parse_custom_unzoned_format(input),
+            Self::CustomZoned => parse_custom_zoned_format(input),
         }
     }
 }
@@ -48,20 +50,43 @@ fn parse_from_rfc3339(input: &str) -> Option<ParsedInput> {
         })
 }
 
-const CUSTOM_FORMATS: [&str; 2] = ["%d %b %Y %H:%M:%S%.3f", "%d %b %Y %H:%M:%S,%3f"];
+const CUSTOM_UNZONED_FORMATS: [&str; 4] = [
+    "%d %b %Y %H:%M:%S%.3f",
+    "%d %b %Y %H:%M:%S,%3f",
+    "%F %T%.3f UTC",
+    "%T%.3f UTC %F",
+];
 
-fn parse_custom_format(input: &str) -> Option<ParsedInput> {
-    CUSTOM_FORMATS
+fn parse_custom_unzoned_format(input: &str) -> Option<ParsedInput> {
+    CUSTOM_UNZONED_FORMATS
         .iter()
-        .find_map(|s| parse_from_format(input, s))
+        .find_map(|s| parse_from_format_unzoned(input, s))
 }
 
-fn parse_from_format(input: &str, format: &str) -> Option<ParsedInput> {
+fn parse_from_format_unzoned(input: &str, format: &str) -> Option<ParsedInput> {
     Utc.datetime_from_str(input, format)
         .ok()
         .map(|d| ParsedInput {
-            input_format: DateTimeFormat::Custom,
+            input_format: DateTimeFormat::CustomUnzoned,
             input_zone: None,
+            value: d.with_timezone(&Utc),
+        })
+}
+
+const CUSTOM_ZONED_FORMATS: [&str; 0] = [];
+
+fn parse_custom_zoned_format(input: &str) -> Option<ParsedInput> {
+    CUSTOM_ZONED_FORMATS
+        .iter()
+        .find_map(|s| parse_from_format_zoned(input, s))
+}
+
+fn parse_from_format_zoned(input: &str, format: &str) -> Option<ParsedInput> {
+    DateTime::parse_from_str(input, format)
+        .ok()
+        .map(|d| ParsedInput {
+            input_format: DateTimeFormat::CustomZoned,
+            input_zone: Some(d.timezone()),
             value: d.with_timezone(&Utc),
         })
 }
@@ -79,7 +104,8 @@ pub fn parse_input(input: &Option<String>) -> Result<ParsedInput, &'static str> 
             DateTimeFormat::EpochMillis
                 .parse(i)
                 .or_else(|| DateTimeFormat::Rfc3339.parse(i))
-                .or_else(|| DateTimeFormat::Custom.parse(i))
+                .or_else(|| DateTimeFormat::CustomZoned.parse(i))
+                .or_else(|| DateTimeFormat::CustomUnzoned.parse(i))
                 .ok_or("Input format not recognized")
         },
     )
@@ -155,7 +181,7 @@ mod tests {
     #[test]
     fn date_spelled_short_month_time_with_dot_input() {
         let result = parse_input(&Some(String::from("03 Feb 2020 01:03:10.534"))).unwrap();
-        assert_eq!(result.input_format, DateTimeFormat::Custom);
+        assert_eq!(result.input_format, DateTimeFormat::CustomUnzoned);
         assert_eq!(result.input_zone, None);
         assert_eq!(result.value, Utc.timestamp_millis(1580691790534));
     }
@@ -163,9 +189,25 @@ mod tests {
     #[test]
     fn date_spelled_short_month_time_with_comma_input() {
         let result = parse_input(&Some(String::from("03 Feb 2020 01:03:10,534"))).unwrap();
-        assert_eq!(result.input_format, DateTimeFormat::Custom);
+        assert_eq!(result.input_format, DateTimeFormat::CustomUnzoned);
         assert_eq!(result.input_zone, None);
         assert_eq!(result.value, Utc.timestamp_millis(1580691790534));
+    }
+
+    #[test]
+    fn year_space_date_space_utc() {
+        let result = parse_input(&Some(String::from("2019-11-22 09:03:44.00 UTC"))).unwrap();
+        assert_eq!(result.input_format, DateTimeFormat::CustomUnzoned);
+        assert_eq!(result.input_zone, None);
+        assert_eq!(result.value, Utc.timestamp_millis(1574413424000));
+    }
+
+    #[test]
+    fn time_space_utc_space_date() {
+        let result = parse_input(&Some(String::from("04:10:39 UTC 2020-02-17"))).unwrap();
+        assert_eq!(result.input_format, DateTimeFormat::CustomUnzoned);
+        assert_eq!(result.input_zone, None);
+        assert_eq!(result.value, Utc.timestamp_millis(1581912639000));
     }
 
     #[test]
