@@ -1,5 +1,6 @@
 [env]
 CARGO_MAKE_CLIPPY_ARGS = "--all-targets --all-features -- -D warnings -D clippy::pedantic"
+CARGO_MAKE_RELEASE_FLOW_TARGET = "x86_64-apple-darwin"
 
 [tasks.pre-build]
 dependencies = ["clippy"]

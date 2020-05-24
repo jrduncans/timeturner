@@ -1,4 +1,5 @@
 use chrono::prelude::*;
+use chrono_english::{parse_date_string,Dialect};
 
 #[derive(PartialEq, Debug)]
 pub enum DateTimeFormat {
@@ -7,6 +8,7 @@ pub enum DateTimeFormat {
     Rfc3339,
     CustomUnzoned,
     CustomZoned,
+    English,
 }
 
 impl DateTimeFormat {
@@ -17,6 +19,7 @@ impl DateTimeFormat {
             Self::Rfc3339 => parse_from_rfc3339(input),
             Self::CustomUnzoned => parse_custom_unzoned_format(input),
             Self::CustomZoned => parse_custom_zoned_format(input),
+            Self::English => parse_from_english(input),
         }
     }
 }
@@ -91,6 +94,14 @@ fn parse_from_format_zoned(input: &str, format: &str) -> Option<ParsedInput> {
         })
 }
 
+fn parse_from_english(input: &str) -> Option<ParsedInput> {
+    parse_date_string(input, Local::now(), Dialect::Us).ok().map(|d| ParsedInput {
+        input_format: DateTimeFormat::English,
+        input_zone: None,
+        value: d.with_timezone(&Utc),
+    })
+}
+
 pub fn parse_input(input: &Option<String>) -> Result<ParsedInput, &'static str> {
     input.as_ref().map_or_else(
         || {
@@ -106,6 +117,7 @@ pub fn parse_input(input: &Option<String>) -> Result<ParsedInput, &'static str> 
                 .or_else(|| DateTimeFormat::Rfc3339.parse(i))
                 .or_else(|| DateTimeFormat::CustomZoned.parse(i))
                 .or_else(|| DateTimeFormat::CustomUnzoned.parse(i))
+                .or_else(|| DateTimeFormat::English.parse(i))
                 .ok_or("Input format not recognized")
         },
     )
@@ -208,6 +220,14 @@ mod tests {
         assert_eq!(result.input_format, DateTimeFormat::CustomUnzoned);
         assert_eq!(result.input_zone, None);
         assert_eq!(result.value, Utc.timestamp_millis(1581912639000));
+    }
+
+    #[test]
+    fn english_input() {
+        let result = parse_input(&Some(String::from("May 23, 2020 12:00"))).unwrap();
+        assert_eq!(result.input_format, DateTimeFormat::English);
+        assert_eq!(result.input_zone, None);
+        assert_eq!(result.value, Utc.timestamp_millis(1590260400000));
     }
 
     #[test]
