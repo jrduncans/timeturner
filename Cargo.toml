@@ -1,6 +1,6 @@
 [package]
 name = "timeturner"
-version = "1.2.0"
+version = "1.3.0"
 authors = ["Stephen Duncan <jrduncans@users.noreply.github.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
