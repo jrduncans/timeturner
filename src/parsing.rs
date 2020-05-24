@@ -103,7 +103,7 @@ fn parse_from_english(input: &str) -> Option<ParsedInput> {
 }
 
 pub fn parse_input(input: &Option<String>) -> Result<ParsedInput, &'static str> {
-    input.as_ref().map_or_else(
+    input.as_ref().filter(|i| !i.trim().is_empty()).map_or_else(
         || {
             Ok(ParsedInput {
                 input_format: DateTimeFormat::Missing,
@@ -133,6 +133,27 @@ mod tests {
     fn missing_input() {
         let now = Utc::now();
         let result = parse_input(&None).unwrap();
+        assert_eq!(result.input_format, crate::parsing::DateTimeFormat::Missing);
+        assert_eq!(result.input_zone, None);
+        assert!(
+            result.value.timestamp_millis() >= now.timestamp_millis(),
+            "Provided time {} was not after the start of the test {}",
+            result.value,
+            now
+        );
+
+        assert!(
+            result.value.timestamp_millis() < now.timestamp_millis() + 1000,
+            "Provided time {} was more than one second after the start of the test {}",
+            result.value,
+            now
+        );
+    }
+
+    #[test]
+    fn empty_input() {
+        let now = Utc::now();
+        let result = parse_input(&Some(String::from(" "))).unwrap();
         assert_eq!(result.input_format, crate::parsing::DateTimeFormat::Missing);
         assert_eq!(result.input_zone, None);
         assert!(
