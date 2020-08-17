@@ -1,5 +1,5 @@
 use chrono::prelude::*;
-use chrono_english::{parse_date_string,Dialect};
+use chrono_english::{parse_date_string, Dialect};
 
 #[derive(PartialEq, Debug)]
 pub enum DateTimeFormat {
@@ -95,11 +95,13 @@ fn parse_from_format_zoned(input: &str, format: &str) -> Option<ParsedInput> {
 }
 
 fn parse_from_english(input: &str) -> Option<ParsedInput> {
-    parse_date_string(input, Local::now(), Dialect::Us).ok().map(|d| ParsedInput {
-        input_format: DateTimeFormat::English,
-        input_zone: None,
-        value: d.with_timezone(&Utc),
-    })
+    parse_date_string(input, Local::now(), Dialect::Us)
+        .ok()
+        .map(|d| ParsedInput {
+            input_format: DateTimeFormat::English,
+            input_zone: None,
+            value: d.with_timezone(&Utc),
+        })
 }
 
 pub fn parse_input(input: &Option<String>) -> Result<ParsedInput, &'static str> {

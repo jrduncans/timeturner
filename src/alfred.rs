@@ -23,12 +23,14 @@ pub fn output_json(conversion_results: &[ConversionResult]) -> String {
                 ConversionFormat::Rfc3339Utc => String::from("rfc3339_utc"),
                 ConversionFormat::Rfc3339Local => String::from("rfc3339_local"),
                 ConversionFormat::EpochMillis => String::from("epoch_millis"),
+                ConversionFormat::DurationSince => String::from("duration_since"),
             },
             title: conversion_result.converted_text.clone(),
             subtitle: match conversion_result.format {
                 ConversionFormat::Rfc3339Utc => String::from("RFC3339 - UTC"),
                 ConversionFormat::Rfc3339Local => String::from("RFC3339 - Local"),
                 ConversionFormat::EpochMillis => String::from("Epoch Millis"),
+                ConversionFormat::DurationSince => String::from("Duration"),
             },
             arg: conversion_result.converted_text.clone(),
         })
