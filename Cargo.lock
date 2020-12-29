@@ -314,7 +314,7 @@ dependencies = [
 
 [[package]]
 name = "timeturner"
-version = "1.4.0"
+version = "1.5.0"
 dependencies = [
  "chrono",
  "chrono-english",
