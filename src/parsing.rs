@@ -53,7 +53,8 @@ fn parse_from_rfc3339(input: &str) -> Option<ParsedInput> {
         })
 }
 
-const CUSTOM_UNZONED_FORMATS: [&str; 4] = [
+const CUSTOM_UNZONED_FORMATS: [&str; 5] = [
+    "%F %T,%3f",
     "%d %b %Y %H:%M:%S%.3f",
     "%d %b %Y %H:%M:%S,%3f",
     "%F %T%.3f UTC",
@@ -211,6 +212,14 @@ mod tests {
         assert_eq!(result.input_format, DateTimeFormat::Rfc3339);
         assert_eq!(result.input_zone, Some(FixedOffset::west(25200)));
         assert_eq!(result.value, Utc.timestamp_millis(1572213799747));
+    }
+
+    #[test]
+    fn custom_unzoned_rfc3339_like_with_space_and_comma() {
+        let result = parse_input(&Some(String::from("2020-12-17 00:00:34,247"))).unwrap();
+        assert_eq!(result.input_format, DateTimeFormat::CustomUnzoned);
+        assert_eq!(result.input_zone, None);
+        assert_eq!(result.value, Utc.timestamp_millis(1608163234247));
     }
 
     #[test]
