@@ -4,3 +4,25 @@ CARGO_MAKE_RELEASE_FLOW_TARGET = "x86_64-apple-darwin"
 
 [tasks.pre-build]
 dependencies = ["clippy"]
+
+[tasks.create-release-universal-binary]
+description = "Create universal binary from aarch64-apple-darwin and x86_64-apple-darwin release builds"
+category = "Build"
+condition = { env_set = ["CARGO_MAKE_BINARY_EXECUTABLE_NAME"] }
+script = '''
+mkdir -p target/universal/release
+lipo -create -output target/universal/release/${CARGO_MAKE_BINARY_EXECUTABLE_NAME} target/aarch64-apple-darwin/release/${CARGO_MAKE_BINARY_EXECUTABLE_NAME} target/x86_64-apple-darwin/release/${CARGO_MAKE_BINARY_EXECUTABLE_NAME}
+'''
+
+[tasks.build-release-aarch64-apple-darwin]
+env = { CARGO_MAKE_RELEASE_FLOW_TARGET = "aarch64-apple-darwin", CARGO_MAKE_CI = "true" }
+run_task = "build-release-for-target"
+
+[tasks.build-release-x86_64-apple-darwin]
+env = { CARGO_MAKE_RELEASE_FLOW_TARGET = "x86_64-apple-darwin", CARGO_MAKE_CI = "true" }
+run_task = "build-release-for-target"
+
+[tasks.release-universal-binary-flow]
+description = "Creates aarch64-apple-darwin and x86_64-apple-darwin release and produces a universal binary"
+category = "Build"
+dependencies = ["build-release-aarch64-apple-darwin", "build-release-x86_64-apple-darwin", "create-release-universal-binary"]
