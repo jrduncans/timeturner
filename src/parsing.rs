@@ -53,12 +53,13 @@ fn parse_from_rfc3339(input: &str) -> Option<ParsedInput> {
         })
 }
 
-const CUSTOM_UNZONED_FORMATS: [&str; 5] = [
+const CUSTOM_UNZONED_FORMATS: [&str; 6] = [
     "%F %T,%3f",
     "%d %b %Y %H:%M:%S%.3f",
     "%d %b %Y %H:%M:%S,%3f",
     "%F %T%.3f UTC",
     "%T%.3f UTC %F",
+    "%F %T%.6f",
 ];
 
 fn parse_custom_unzoned_format(input: &str) -> Option<ParsedInput> {
@@ -77,7 +78,7 @@ fn parse_from_format_unzoned(input: &str, format: &str) -> Option<ParsedInput> {
         })
 }
 
-const CUSTOM_ZONED_FORMATS: [&str; 0] = [];
+const CUSTOM_ZONED_FORMATS: [&str; 2] = ["%F %T%z", "%F %T%.3f%z"];
 
 fn parse_custom_zoned_format(input: &str) -> Option<ParsedInput> {
     CUSTOM_ZONED_FORMATS
@@ -252,6 +253,30 @@ mod tests {
         assert_eq!(result.input_format, DateTimeFormat::CustomUnzoned);
         assert_eq!(result.input_zone, None);
         assert_eq!(result.value, Utc.timestamp_millis(1581912639000));
+    }
+
+    #[test]
+    fn test_casssandra_zoned_no_millis() {
+        let result = parse_input(&Some(String::from("2015-03-07 00:59:56+0100"))).unwrap();
+        assert_eq!(result.input_format, DateTimeFormat::CustomZoned);
+        assert_eq!(result.input_zone, Some(FixedOffset::east(3600)));
+        assert_eq!(result.value, Utc.timestamp_millis(1425686396000));
+    }
+
+    #[test]
+    fn test_casssandra_zoned_millis() {
+        let result = parse_input(&Some(String::from("2015-03-07 00:59:56.001+0100"))).unwrap();
+        assert_eq!(result.input_format, DateTimeFormat::CustomZoned);
+        assert_eq!(result.input_zone, Some(FixedOffset::east(3600)));
+        assert_eq!(result.value, Utc.timestamp_millis(1425686396001));
+    }
+
+    #[test]
+    fn test_mysql_datetime() {
+        let result = parse_input(&Some(String::from("2021-01-20 18:13:37.842000"))).unwrap();
+        assert_eq!(result.input_format, DateTimeFormat::CustomUnzoned);
+        assert_eq!(result.input_zone, None);
+        assert_eq!(result.value, Utc.timestamp_millis(1611166417842));
     }
 
     #[test]
