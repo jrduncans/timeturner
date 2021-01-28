@@ -41,3 +41,7 @@ For use in **Alfred** download the [latest release](https://github.com/jrduncans
 > 1580691790534
 >
 > 11months 25days 4h 1m 14s 858ms ago
+
+## Alfred Usage
+
+![Alfred Timeturner Screenhot](AlfredTimeturnerScreenshot.png "Alfred Timeturner Screenshot")
