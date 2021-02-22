@@ -1,5 +1,6 @@
 use crate::converting::ConversionResult;
 use chrono::prelude::*;
+use clap::arg_enum;
 
 mod alfred;
 mod converting;
@@ -10,6 +11,19 @@ pub enum OutputMode {
     Alfred,
 }
 
+arg_enum! {
+    #[derive(PartialEq, Debug, Clone, Copy)]
+    pub enum DurationUnit {
+        Milliseconds,
+        Seconds,
+        Minutes,
+        Hours,
+        Days,
+        Weeks,
+        Fortnights
+    }
+}
+
 /// Takes an optional input and prints conversions to different date-time formats.
 /// If an input string is not given, then `now` is used.
 /// If the input format cannot be handled, a string suitable for display to the user
@@ -18,9 +32,14 @@ pub enum OutputMode {
 /// # Errors
 ///
 /// Will return an error string if `input` cannot be parsed to a date.
-pub fn run(input: &Option<String>, output_mode: &OutputMode) -> Result<(), &'static str> {
+pub fn run(
+    input: &Option<String>,
+    output_mode: &OutputMode,
+    extra_duration_unit: Option<DurationUnit>,
+) -> Result<(), &'static str> {
     let parsed_input = crate::parsing::parse_input(input)?;
-    let conversion_results = crate::converting::convert(&parsed_input, Utc::now());
+    let conversion_results =
+        crate::converting::convert(&parsed_input, &Utc::now(), extra_duration_unit);
 
     match output_mode {
         OutputMode::ValuePerLine => output_value_per_line(&conversion_results),

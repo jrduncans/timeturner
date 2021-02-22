@@ -42,6 +42,16 @@ For use in **Alfred** download the [latest release](https://github.com/jrduncans
 >
 > 11months 25days 4h 1m 14s 858ms ago
 
+`timeturner 1575149020890 -d days`
+
+> 2019-11-30T21:23:40.890Z
+>
+> 2019-11-30T13:23:40.890-08:00
+>
+> 1year 2months 23days 3h 52m 12s 74ms ago
+>
+> 449.3 days ago
+
 ## Alfred Usage
 
 ![Alfred Timeturner Screenhot](AlfredTimeturnerScreenshot.png "Alfred Timeturner Screenshot")
