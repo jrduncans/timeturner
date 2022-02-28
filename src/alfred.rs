@@ -27,7 +27,7 @@ pub fn output_json(conversion_results: &[ConversionResult]) -> String {
                 ConversionFormat::DurationSinceUnits(duration_unit) => {
                     format!(
                         "duration_since_{}",
-                        duration_unit.to_string().to_lowercase()
+                        format!("{:?}", duration_unit).to_lowercase()
                     )
                 }
             },

@@ -1,6 +1,6 @@
 use crate::converting::ConversionResult;
 use chrono::prelude::*;
-use clap::arg_enum;
+use clap::ArgEnum;
 
 mod alfred;
 mod converting;
@@ -11,17 +11,15 @@ pub enum OutputMode {
     Alfred,
 }
 
-arg_enum! {
-    #[derive(PartialEq, Debug, Clone, Copy)]
-    pub enum DurationUnit {
-        Milliseconds,
-        Seconds,
-        Minutes,
-        Hours,
-        Days,
-        Weeks,
-        Fortnights
-    }
+#[derive(PartialEq, Debug, Clone, Copy, ArgEnum)]
+pub enum DurationUnit {
+    Milliseconds,
+    Seconds,
+    Minutes,
+    Hours,
+    Days,
+    Weeks,
+    Fortnights,
 }
 
 /// Takes an optional input and prints conversions to different date-time formats.
