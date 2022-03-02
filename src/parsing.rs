@@ -44,7 +44,7 @@ fn parse_from_epoch_millis(input: &str) -> Option<ParsedInput> {
 }
 
 fn parse_from_rfc3339(input: &str) -> Option<ParsedInput> {
-    DateTime::parse_from_rfc3339(&input.replace(" ", "T"))
+    DateTime::parse_from_rfc3339(&input.replace(' ', "T"))
         .ok()
         .map(|d| ParsedInput {
             input_format: DateTimeFormat::Rfc3339,

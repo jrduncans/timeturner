@@ -63,7 +63,7 @@ pub fn convert(
         results.push(ConversionResult {
             converted_text: unit_duration_since(&parsed_input.value, now, duration_unit),
             format: ConversionFormat::DurationSinceUnits(duration_unit),
-        })
+        });
     };
 
     results
@@ -122,7 +122,7 @@ pub fn unit_duration_since(
     }
 }
 
-#[allow(clippy::cast_possible_truncation, clippy::clippy::cast_precision_loss)]
+#[allow(clippy::cast_possible_truncation, clippy::cast_precision_loss)]
 fn rounded_division(value: i64, units: &str, divide_by: f64) -> String {
     format!("{:.1} {}", value as f64 / divide_by, units)
 }
