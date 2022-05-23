@@ -85,6 +85,7 @@ jobs:
         do
           mkdir -p timeturner-${{ steps.get_version.outputs.VERSION }}-${target}
           cp LICENSE README.md timeturner-${target}/timeturner timeturner-${{ steps.get_version.outputs.VERSION }}-${target}
+          chmod +x timeturner-${{ steps.get_version.outputs.VERSION }}-${target}/timeturner
           zip -r timeturner-${{ steps.get_version.outputs.VERSION }}-${target}.zip timeturner-${{ steps.get_version.outputs.VERSION }}-${target}
         done
 
