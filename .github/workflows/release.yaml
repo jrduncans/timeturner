@@ -75,9 +75,8 @@ jobs:
 
     - name: Create Universal Binary
       run: |
-        pwd
-        ls -la
-        lipo -create -output timeturner-universal-apple-darwin timeturner-x86_64-apple-darwin timeturner-aarch64-apple-darwin
+        mkdir -p timeturner-universal-apple-darwin
+        lipo -create -output timeturner-universal-apple-darwin/timeturner timeturner-x86_64-apple-darwin/timeturner timeturner-aarch64-apple-darwin/timeturner
 
     - name: Create Zip Files
       shell: bash
@@ -85,7 +84,7 @@ jobs:
         for target in universal-apple-darwin aarch64-apple-darwin x86_64-apple-darwin x86-64-unknown-linux-musl
         do
           mkdir -p timeturner-${{ steps.get_version.outputs.VERSION }}-${target}
-          cp LICENSE README.md timeturner-${target} timeturner-${{ steps.get_version.outputs.VERSION }}-${target}
+          cp LICENSE README.md timeturner-${target}/timeturner timeturner-${{ steps.get_version.outputs.VERSION }}-${target}
           zip timeturner-${{ steps.get_version.outputs.VERSION }}-${target}.zip timeturner-${{ steps.get_version.outputs.VERSION }}-${target}
         done
 
