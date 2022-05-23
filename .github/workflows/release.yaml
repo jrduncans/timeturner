@@ -61,14 +61,17 @@ jobs:
     - uses: actions/download-artifact@v3
       with:
         name: timeturner-x86_64-unknown-linux-musl
+        path: timeturner-x86_64-unknown-linux-musl
 
     - uses: actions/download-artifact@v3
       with:
         name: timeturner-x86_64-apple-darwin
+        path: timeturner-x86_64-apple-darwin
 
     - uses: actions/download-artifact@v3
       with:
         name: timeturner-aarch64-apple-darwin
+        path: timeturner-aarch64-apple-darwin
 
     - name: Create Universal Binary
       run: lipo -create -output timeturner-universal-apple-darwin timeturner-x86_64-apple-darwin timeturner-aarch64-apple-darwin
