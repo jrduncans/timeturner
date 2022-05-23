@@ -2,18 +2,18 @@ name: Release
 on:
   push:
     tags:
-      - 'v[0-9]+.*'
+    - 'v[0-9]+.*'
 env:
   CARGO_TERM_COLOR: always
 jobs:
-  release:
-    name: Release
+  build:
+    name: Build Releases
     strategy:
       matrix:
         job:
-          - {os: ubuntu-latest, target: x86_64-unknown-linux-musl}
-          - {os: macos-latest, target: x86_64-apple-darwin}
-          - {os: macos-latest, target: aarch64-apple-darwin}
+        - {os: ubuntu-latest, target: x86_64-unknown-linux-musl}
+        - {os: macos-latest, target: x86_64-apple-darwin}
+        - {os: macos-latest, target: aarch64-apple-darwin}
 
     runs-on: ${{ matrix.job.os }}
     steps:
@@ -37,3 +37,59 @@ jobs:
     - name: Strip release binary (linux and macos)
       if: matrix.job.os == 'ubuntu-latest' || matrix.job.os == 'macos-latest'
       run: strip "target/${{ matrix.job.target }}/release/timeturner"
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: timeturner-${{ matrix.job.target }}
+        path: target/${{ matrix.job.target }}/release/timeturner
+        retention-days: 1
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Get tag version
+      id: get_version
+      run: echo ::set-output name=VERSION::``${GITHUB_REF#refs/tags/}``
+      shell: bash
+
+    - uses: actions/download-artifact@v3
+      with:
+        name: timeturner-x86_64-unknown-linux-musl
+
+    - uses: actions/download-artifact@v3
+      with:
+        name: timeturner-x86_64-apple-darwin
+
+    - uses: actions/download-artifact@v3
+      with:
+        name: timeturner-aarch64-apple-darwin
+
+    - name: Create Universal Binary
+      run: lipo -create -output timeturner-universal-apple-darwin timeturner-x86_64-apple-darwin timeturner-aarch64-apple-darwin
+
+    - name: Create Zip Files
+      shell: bash
+      run: |
+        for target in universal-apple-darwin aarch64-apple-darwin x86_64-apple-darwin x86-64-unknown-linux-musl
+        do
+          mkdir -p timeturner-${{ steps.get_version.outputs.VERSION }}-${target}
+          cp LICENSE README.md timeturner-${target} timeturner-${{ steps.get_version.outputs.VERSION }}-${target}
+          zip timeturner-${{ steps.get_version.outputs.VERSION }}-${target}.zip timeturner-${{ steps.get_version.outputs.VERSION }}-${target}
+        done
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        generate_release_notes: true
+        files: |
+          timeturner-${{ steps.get_version.outputs.VERSION }}-universal-apple-darwin.zip
+          timeturner-${{ steps.get_version.outputs.VERSION }}-aarch64-apple-darwin.zip
+          timeturner-${{ steps.get_version.outputs.VERSION }}-x86_64-apple-darwin.zip
+          timeturner-${{ steps.get_version.outputs.VERSION }}-x86-64-unknown-linux-musl.zip
