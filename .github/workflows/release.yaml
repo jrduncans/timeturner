@@ -74,7 +74,10 @@ jobs:
         path: timeturner-aarch64-apple-darwin
 
     - name: Create Universal Binary
-      run: lipo -create -output timeturner-universal-apple-darwin timeturner-x86_64-apple-darwin timeturner-aarch64-apple-darwin
+      run: |
+        pwd
+        ls -la
+        lipo -create -output timeturner-universal-apple-darwin timeturner-x86_64-apple-darwin timeturner-aarch64-apple-darwin
 
     - name: Create Zip Files
       shell: bash
