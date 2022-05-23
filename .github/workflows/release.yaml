@@ -81,7 +81,7 @@ jobs:
     - name: Create Zip Files
       shell: bash
       run: |
-        for target in universal-apple-darwin aarch64-apple-darwin x86_64-apple-darwin x86-64-unknown-linux-musl
+        for target in universal-apple-darwin aarch64-apple-darwin x86_64-apple-darwin x86_64-unknown-linux-musl
         do
           mkdir -p timeturner-${{ steps.get_version.outputs.VERSION }}-${target}
           cp LICENSE README.md timeturner-${target}/timeturner timeturner-${{ steps.get_version.outputs.VERSION }}-${target}
@@ -97,4 +97,4 @@ jobs:
           timeturner-${{ steps.get_version.outputs.VERSION }}-universal-apple-darwin.zip
           timeturner-${{ steps.get_version.outputs.VERSION }}-aarch64-apple-darwin.zip
           timeturner-${{ steps.get_version.outputs.VERSION }}-x86_64-apple-darwin.zip
-          timeturner-${{ steps.get_version.outputs.VERSION }}-x86-64-unknown-linux-musl.zip
+          timeturner-${{ steps.get_version.outputs.VERSION }}-x86_64-unknown-linux-musl.zip
