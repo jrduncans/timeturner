@@ -11,18 +11,12 @@ jobs:
     name: Release
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
-        include:
-          - os: ubuntu-linux
-            target: x86_64-unknown-linux-musl
+        job:
+          - {os: ubuntu-latest, target: x86_64-unknown-linux-musl}
+          - {os: macos-latest, target: x86_64-apple-darwin}
+          - {os: macos-latest, target: aarch64-apple-darwin}
 
-          - os: macos-latest
-            target: x86_64-apple-darwin
-
-          - os: macos-latest
-            target: aarch64-apple-darwin
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.job.os }}
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v3
@@ -33,14 +27,14 @@ jobs:
         override: true
         profile: minimal
         toolchain: stable
-        target: ${{ matrix.target }}
+        target: ${{ matrix.job.target }}
     
     - name: Build Release
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --verbose --release
+        args: --verbose --release --target ${{ matrix.job.target }}
 
     - name: Strip release binary (linux and macos)
-      if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
-      run: strip "target/${{ matrix.target }}/release/rg"
+      if: matrix.job.os == 'ubuntu-latest' || matrix.job.os == 'macos-latest'
+      run: strip "target/${{ matrix.job.target }}/release/timeturner"
