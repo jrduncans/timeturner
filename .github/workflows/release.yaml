@@ -1,0 +1,46 @@
+name: Release
+on:
+  pull_request:
+  push:
+    branches:
+    - main
+env:
+  CARGO_TERM_COLOR: always
+jobs:
+  release:
+    name: Release
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-linux
+            target: x86_64-unknown-linux-musl
+
+          - os: macos-latest
+            target: x86_64-apple-darwin
+
+          - os: macos-latest
+            target: aarch64-apple-darwin
+
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        override: true
+        profile: minimal
+        toolchain: stable
+        target: ${{ matrix.target }}
+    
+    - name: Build Release
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --verbose --release
+
+    - name: Strip release binary (linux and macos)
+      if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+      run: strip "target/${{ matrix.target }}/release/rg"
