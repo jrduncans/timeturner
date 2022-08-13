@@ -11,7 +11,7 @@ pub enum OutputMode {
     Alfred,
 }
 
-#[derive(PartialEq, Debug, Clone, Copy, ArgEnum)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy, ArgEnum)]
 pub enum DurationUnit {
     Milliseconds,
     Seconds,

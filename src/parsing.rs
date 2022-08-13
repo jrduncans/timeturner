@@ -1,7 +1,7 @@
 use chrono::prelude::*;
 use chrono_english::{parse_date_string, Dialect};
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Eq, Debug)]
 pub enum DateTimeFormat {
     Missing,
     EpochMillis,
@@ -24,7 +24,7 @@ impl DateTimeFormat {
     }
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Eq, Debug)]
 pub struct ParsedInput {
     pub input_format: DateTimeFormat,
     pub input_zone: Option<FixedOffset>,

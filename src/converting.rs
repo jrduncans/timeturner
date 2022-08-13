@@ -6,7 +6,7 @@ use humantime::format_duration;
 use std::convert::TryInto;
 use std::time::Duration;
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Eq, Debug)]
 pub enum ConversionFormat {
     Rfc3339Utc,
     Rfc3339Local,
@@ -15,7 +15,7 @@ pub enum ConversionFormat {
     DurationSinceUnits(DurationUnit),
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Eq, Debug)]
 pub struct ConversionResult {
     pub converted_text: String,
     pub format: ConversionFormat,
