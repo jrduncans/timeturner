@@ -1,6 +1,6 @@
 use crate::converting::ConversionResult;
 use chrono::prelude::*;
-use clap::ArgEnum;
+use clap::ValueEnum;
 
 mod alfred;
 mod converting;
@@ -11,7 +11,7 @@ pub enum OutputMode {
     Alfred,
 }
 
-#[derive(PartialEq, Eq, Debug, Clone, Copy, ArgEnum)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy, ValueEnum)]
 pub enum DurationUnit {
     Milliseconds,
     Seconds,

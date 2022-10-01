@@ -7,10 +7,10 @@ use timeturner::OutputMode;
 #[derive(Debug, Parser)]
 #[structopt(name = "timeturner", about = "Manipulate date-time strings")]
 struct Opt {
-    #[clap(long, help = "Output in JSON for Alfred Workflow integration")]
+    #[arg(long, help = "Output in JSON for Alfred Workflow integration")]
     alfred: bool,
 
-    #[clap(short, long, arg_enum)]
+    #[arg(short, long)]
     duration_unit: Option<DurationUnit>,
 
     input: Option<String>,
