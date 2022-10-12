@@ -21,18 +21,12 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Install Rust
-      uses: actions-rs/toolchain@v1
+      uses: dtolnay/rust-toolchain@stable
       with:
-        override: true
-        profile: minimal
-        toolchain: stable
-        target: ${{ matrix.job.target }}
+        targets: ${{ matrix.job.target }}
     
     - name: Build Release
-      uses: actions-rs/cargo@v1
-      with:
-        command: build
-        args: --verbose --release --target ${{ matrix.job.target }}
+      run: cargo build --verbose --release --target ${{ matrix.job.target }}
 
     - name: Strip release binary (linux and macos)
       if: matrix.job.os == 'ubuntu-latest' || matrix.job.os == 'macos-latest'
