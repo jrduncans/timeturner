@@ -5,7 +5,7 @@ use timeturner::DurationUnit;
 use timeturner::OutputMode;
 
 #[derive(Debug, Parser)]
-#[structopt(name = "timeturner", about = "Manipulate date-time strings")]
+#[command(name = "timeturner", about = "Manipulate date-time strings")]
 struct Opt {
     #[arg(long, help = "Output in JSON for Alfred Workflow integration")]
     alfred: bool,

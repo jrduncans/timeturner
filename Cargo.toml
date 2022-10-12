@@ -1,6 +1,6 @@
 [package]
 name = "timeturner"
-version = "1.7.1"
+version = "1.8.0"
 authors = ["Stephen Duncan <jrduncans@users.noreply.github.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
@@ -14,7 +14,7 @@ categories = ["command-line-utilities", "date-and-time", "value-formatting"]
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-clap = { version = "4.0.12", features = ["derive"] }
+clap = { version = "4.0.13", features = ["derive"] }
 chrono = "0.4.22"
 chrono-tz = "0.6.3"
 serde = { version = "1.0.145", features = ["derive"] }
