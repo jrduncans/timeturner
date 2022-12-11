@@ -180,39 +180,54 @@ mod tests {
         let result = parse_input(&Some(String::from("1572213799747"))).unwrap();
         assert_eq!(result.input_format, DateTimeFormat::EpochMillis);
         assert_eq!(result.input_zone, None);
-        assert_eq!(result.value, Utc.timestamp_millis(1572213799747));
+        assert_eq!(
+            result.value,
+            Utc.timestamp_millis_opt(1572213799747).unwrap()
+        );
     }
 
     #[test]
     fn rfc3339_input() {
         let result = parse_input(&Some(String::from("2019-10-27T15:03:19.747-07:00"))).unwrap();
         assert_eq!(result.input_format, DateTimeFormat::Rfc3339);
-        assert_eq!(result.input_zone, Some(FixedOffset::west(25200)));
-        assert_eq!(result.value, Utc.timestamp_millis(1572213799747));
+        assert_eq!(result.input_zone, FixedOffset::west_opt(25200));
+        assert_eq!(
+            result.value,
+            Utc.timestamp_millis_opt(1572213799747).unwrap()
+        );
     }
 
     #[test]
     fn rfc3339_input_no_partial_seconds() {
         let result = parse_input(&Some(String::from("2019-10-27T15:03:19-07:00"))).unwrap();
         assert_eq!(result.input_format, DateTimeFormat::Rfc3339);
-        assert_eq!(result.input_zone, Some(FixedOffset::west(25200)));
-        assert_eq!(result.value, Utc.timestamp_millis(1572213799000));
+        assert_eq!(result.input_zone, FixedOffset::west_opt(25200));
+        assert_eq!(
+            result.value,
+            Utc.timestamp_millis_opt(1572213799000).unwrap()
+        );
     }
 
     #[test]
     fn rfc3339_input_zulu() {
         let result = parse_input(&Some(String::from("2019-10-27T22:03:19.747Z"))).unwrap();
         assert_eq!(result.input_format, DateTimeFormat::Rfc3339);
-        assert_eq!(result.input_zone, Some(FixedOffset::west(0)));
-        assert_eq!(result.value, Utc.timestamp_millis(1572213799747));
+        assert_eq!(result.input_zone, FixedOffset::west_opt(0));
+        assert_eq!(
+            result.value,
+            Utc.timestamp_millis_opt(1572213799747).unwrap()
+        );
     }
 
     #[test]
     fn rfc3339_input_space_instead_of_t() {
         let result = parse_input(&Some(String::from("2019-10-27 15:03:19.747-07:00"))).unwrap();
         assert_eq!(result.input_format, DateTimeFormat::Rfc3339);
-        assert_eq!(result.input_zone, Some(FixedOffset::west(25200)));
-        assert_eq!(result.value, Utc.timestamp_millis(1572213799747));
+        assert_eq!(result.input_zone, FixedOffset::west_opt(25200));
+        assert_eq!(
+            result.value,
+            Utc.timestamp_millis_opt(1572213799747).unwrap()
+        );
     }
 
     #[test]
@@ -220,7 +235,10 @@ mod tests {
         let result = parse_input(&Some(String::from("2020-12-17 00:00:34,247"))).unwrap();
         assert_eq!(result.input_format, DateTimeFormat::CustomUnzoned);
         assert_eq!(result.input_zone, None);
-        assert_eq!(result.value, Utc.timestamp_millis(1608163234247));
+        assert_eq!(
+            result.value,
+            Utc.timestamp_millis_opt(1608163234247).unwrap()
+        );
     }
 
     #[test]
@@ -228,7 +246,10 @@ mod tests {
         let result = parse_input(&Some(String::from("03 Feb 2020 01:03:10.534"))).unwrap();
         assert_eq!(result.input_format, DateTimeFormat::CustomUnzoned);
         assert_eq!(result.input_zone, None);
-        assert_eq!(result.value, Utc.timestamp_millis(1580691790534));
+        assert_eq!(
+            result.value,
+            Utc.timestamp_millis_opt(1580691790534).unwrap()
+        );
     }
 
     #[test]
@@ -236,7 +257,10 @@ mod tests {
         let result = parse_input(&Some(String::from("03 Feb 2020 01:03:10,534"))).unwrap();
         assert_eq!(result.input_format, DateTimeFormat::CustomUnzoned);
         assert_eq!(result.input_zone, None);
-        assert_eq!(result.value, Utc.timestamp_millis(1580691790534));
+        assert_eq!(
+            result.value,
+            Utc.timestamp_millis_opt(1580691790534).unwrap()
+        );
     }
 
     #[test]
@@ -244,7 +268,10 @@ mod tests {
         let result = parse_input(&Some(String::from("2019-11-22 09:03:44.00 UTC"))).unwrap();
         assert_eq!(result.input_format, DateTimeFormat::CustomUnzoned);
         assert_eq!(result.input_zone, None);
-        assert_eq!(result.value, Utc.timestamp_millis(1574413424000));
+        assert_eq!(
+            result.value,
+            Utc.timestamp_millis_opt(1574413424000).unwrap()
+        );
     }
 
     #[test]
@@ -252,23 +279,32 @@ mod tests {
         let result = parse_input(&Some(String::from("04:10:39 UTC 2020-02-17"))).unwrap();
         assert_eq!(result.input_format, DateTimeFormat::CustomUnzoned);
         assert_eq!(result.input_zone, None);
-        assert_eq!(result.value, Utc.timestamp_millis(1581912639000));
+        assert_eq!(
+            result.value,
+            Utc.timestamp_millis_opt(1581912639000).unwrap()
+        );
     }
 
     #[test]
     fn test_casssandra_zoned_no_millis() {
         let result = parse_input(&Some(String::from("2015-03-07 00:59:56+0100"))).unwrap();
         assert_eq!(result.input_format, DateTimeFormat::CustomZoned);
-        assert_eq!(result.input_zone, Some(FixedOffset::east(3600)));
-        assert_eq!(result.value, Utc.timestamp_millis(1425686396000));
+        assert_eq!(result.input_zone, FixedOffset::east_opt(3600));
+        assert_eq!(
+            result.value,
+            Utc.timestamp_millis_opt(1425686396000).unwrap()
+        );
     }
 
     #[test]
     fn test_casssandra_zoned_millis() {
         let result = parse_input(&Some(String::from("2015-03-07 00:59:56.001+0100"))).unwrap();
         assert_eq!(result.input_format, DateTimeFormat::CustomZoned);
-        assert_eq!(result.input_zone, Some(FixedOffset::east(3600)));
-        assert_eq!(result.value, Utc.timestamp_millis(1425686396001));
+        assert_eq!(result.input_zone, FixedOffset::east_opt(3600));
+        assert_eq!(
+            result.value,
+            Utc.timestamp_millis_opt(1425686396001).unwrap()
+        );
     }
 
     #[test]
@@ -276,7 +312,10 @@ mod tests {
         let result = parse_input(&Some(String::from("2021-01-20 18:13:37.842000"))).unwrap();
         assert_eq!(result.input_format, DateTimeFormat::CustomUnzoned);
         assert_eq!(result.input_zone, None);
-        assert_eq!(result.value, Utc.timestamp_millis(1611166417842));
+        assert_eq!(
+            result.value,
+            Utc.timestamp_millis_opt(1611166417842).unwrap()
+        );
     }
 
     #[test]
@@ -284,7 +323,10 @@ mod tests {
         let result = parse_input(&Some(String::from("May 23, 2020 12:00"))).unwrap();
         assert_eq!(result.input_format, DateTimeFormat::English);
         assert_eq!(result.input_zone, None);
-        assert_eq!(result.value, Utc.timestamp_millis(1590260400000));
+        assert_eq!(
+            result.value,
+            Utc.timestamp_millis_opt(1590260400000).unwrap()
+        );
     }
 
     #[test]

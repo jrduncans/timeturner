@@ -28,7 +28,7 @@ pub fn convert(
 ) -> Vec<ConversionResult> {
     let mut results = Vec::new();
 
-    if parsed_input.input_zone != Some(FixedOffset::west(0)) {
+    if parsed_input.input_zone != FixedOffset::west_opt(0) {
         results.push(ConversionResult {
             converted_text: parsed_input
                 .value
@@ -135,8 +135,8 @@ mod tests {
 
     #[test]
     fn missing_input() {
-        let now = Utc.timestamp_millis(1572303922748);
-        let date = Utc.timestamp_millis(1572213799747);
+        let now = Utc.timestamp_millis_opt(1572303922748).unwrap();
+        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
         let result = convert(
             &ParsedInput {
                 input_format: DateTimeFormat::Missing,
@@ -175,8 +175,8 @@ mod tests {
 
     #[test]
     fn epoch_millis_input() {
-        let now = Utc.timestamp_millis(1572123676746);
-        let date = Utc.timestamp_millis(1572213799747);
+        let now = Utc.timestamp_millis_opt(1572123676746).unwrap();
+        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
         let result = convert(
             &ParsedInput {
                 input_format: DateTimeFormat::EpochMillis,
@@ -211,12 +211,12 @@ mod tests {
 
     #[test]
     fn rfc3339_utc() {
-        let now = Utc.timestamp_millis(1572213929748);
-        let date = Utc.timestamp_millis(1572213799747);
+        let now = Utc.timestamp_millis_opt(1572213929748).unwrap();
+        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
         let result = convert(
             &ParsedInput {
                 input_format: DateTimeFormat::Rfc3339,
-                input_zone: Some(FixedOffset::west(0)),
+                input_zone: FixedOffset::west_opt(0),
                 value: date,
             },
             &now,
@@ -247,8 +247,8 @@ mod tests {
 
     #[test]
     fn rfc3339_offset() {
-        let now = Utc.timestamp_millis(1572213799749);
-        let date = Utc.timestamp_millis(1572213799747);
+        let now = Utc.timestamp_millis_opt(1572213799749).unwrap();
+        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
         let result = convert(
             &ParsedInput {
                 input_format: DateTimeFormat::Rfc3339,
@@ -281,8 +281,8 @@ mod tests {
 
     #[test]
     fn duration_millis() {
-        let now = Utc.timestamp_millis(1572123676746);
-        let date = Utc.timestamp_millis(1572213799747);
+        let now = Utc.timestamp_millis_opt(1572123676746).unwrap();
+        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
         let result = convert(
             &ParsedInput {
                 input_format: DateTimeFormat::EpochMillis,
@@ -305,8 +305,8 @@ mod tests {
 
     #[test]
     fn duration_seconds() {
-        let now = Utc.timestamp_millis(1572123676746);
-        let date = Utc.timestamp_millis(1572213799747);
+        let now = Utc.timestamp_millis_opt(1572123676746).unwrap();
+        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
         let result = convert(
             &ParsedInput {
                 input_format: DateTimeFormat::EpochMillis,
@@ -329,8 +329,8 @@ mod tests {
 
     #[test]
     fn duration_minutes() {
-        let now = Utc.timestamp_millis(1572123676746);
-        let date = Utc.timestamp_millis(1572213799747);
+        let now = Utc.timestamp_millis_opt(1572123676746).unwrap();
+        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
         let result = convert(
             &ParsedInput {
                 input_format: DateTimeFormat::EpochMillis,
@@ -353,8 +353,8 @@ mod tests {
 
     #[test]
     fn duration_hours() {
-        let now = Utc.timestamp_millis(1572123676746);
-        let date = Utc.timestamp_millis(1572213799747);
+        let now = Utc.timestamp_millis_opt(1572123676746).unwrap();
+        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
         let result = convert(
             &ParsedInput {
                 input_format: DateTimeFormat::EpochMillis,
@@ -377,8 +377,8 @@ mod tests {
 
     #[test]
     fn duration_days() {
-        let now = Utc.timestamp_millis(1572123676746);
-        let date = Utc.timestamp_millis(1572213799747);
+        let now = Utc.timestamp_millis_opt(1572123676746).unwrap();
+        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
         let result = convert(
             &ParsedInput {
                 input_format: DateTimeFormat::EpochMillis,
@@ -401,8 +401,8 @@ mod tests {
 
     #[test]
     fn duration_weeks() {
-        let now = Utc.timestamp_millis(1572123676746);
-        let date = Utc.timestamp_millis(1572213799747);
+        let now = Utc.timestamp_millis_opt(1572123676746).unwrap();
+        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
         let result = convert(
             &ParsedInput {
                 input_format: DateTimeFormat::EpochMillis,
@@ -425,8 +425,8 @@ mod tests {
 
     #[test]
     fn duration_fortnights() {
-        let now = Utc.timestamp_millis(1572123676746);
-        let date = Utc.timestamp_millis(1572213799747);
+        let now = Utc.timestamp_millis_opt(1572123676746).unwrap();
+        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
         let result = convert(
             &ParsedInput {
                 input_format: DateTimeFormat::EpochMillis,
