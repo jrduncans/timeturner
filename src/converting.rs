@@ -79,9 +79,9 @@ pub fn human_duration_since(input: &DateTime<Utc>, now: &DateTime<Utc>) -> Strin
     let duration_format = format_duration(duration);
 
     if in_future {
-        format!("in {}", duration_format)
+        format!("in {duration_format}")
     } else {
-        format!("{} ago", duration_format)
+        format!("{duration_format} ago")
     }
 }
 
@@ -96,7 +96,7 @@ pub fn unit_duration_since(
     let difference_millis = difference_millis.abs();
 
     let duration_format = match duration_unit {
-        DurationUnit::Milliseconds => format!("{} ms", difference_millis),
+        DurationUnit::Milliseconds => format!("{difference_millis} ms"),
         DurationUnit::Seconds => rounded_division(difference_millis, "s", 1000.0),
         DurationUnit::Minutes => rounded_division(difference_millis, "m", 60.0 * 1000.0),
         DurationUnit::Hours => rounded_division(difference_millis, "h", 60.0 * 60.0 * 1000.0),
@@ -116,15 +116,15 @@ pub fn unit_duration_since(
     };
 
     if in_future {
-        format!("in {}", duration_format)
+        format!("in {duration_format}")
     } else {
-        format!("{} ago", duration_format)
+        format!("{duration_format} ago")
     }
 }
 
 #[allow(clippy::cast_possible_truncation, clippy::cast_precision_loss)]
 fn rounded_division(value: i64, units: &str, divide_by: f64) -> String {
-    format!("{:.1} {}", value as f64 / divide_by, units)
+    format!("{:.1} {units}", value as f64 / divide_by)
 }
 
 #[cfg(test)]

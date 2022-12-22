@@ -20,7 +20,7 @@ fn main() {
     let opt: Opt = Parser::parse();
 
     if let Err(err) = timeturner::run(&opt.input, &output_mode(&opt), opt.duration_unit) {
-        eprintln!("{}", err);
+        eprintln!("{err}");
         process::exit(1);
     }
 }
