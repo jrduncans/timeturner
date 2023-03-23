@@ -18,39 +18,40 @@ For use in **Alfred** download the [latest release](https://github.com/jrduncans
 
 `timeturner 1575149020890`
 
-> 2019-11-30T21:23:40.890Z
->
-> 2019-11-30T13:23:40.890-08:00
->
-> 1year 1month 28days 11h 15m 59s 32ms ago
+```text
+2019-11-30T21:23:40.890Z
+2019-11-30T13:23:40.890-08:00
+1575149020890
+3years 3months 21days 22h 29m 35s 867ms ago
+```
 
 `timeturner 2019-11-30T13:27:45-08:00`
 
-> 2019-11-30T21:27:45.000Z
->
-> 1575149265000
->
-> 1year 1month 28days 11h 12m 24s 33ms ag
+```text
+2019-11-30T21:27:45.000Z
+2019-11-30T13:27:45.000-08:00
+1575149265000
+3years 3months 21days 22h 29m 13s 981ms ago
+```
 
 `timeturner '03 Feb 2020 01:03:10.534'`
 
-> 2020-02-03T01:03:10.534Z
->
-> 2020-02-02T17:03:10.534-08:00
->
-> 1580691790534
->
-> 11months 25days 4h 1m 14s 858ms ago
+```text
+2020-02-03T01:03:10.534Z
+2020-02-02T17:03:10.534-08:00
+1580691790534
+3years 1month 18days 16h 1m 26s 481ms ago
+```
 
 `timeturner 1575149020890 -d days`
 
-> 2019-11-30T21:23:40.890Z
->
-> 2019-11-30T13:23:40.890-08:00
->
-> 1year 2months 23days 3h 52m 12s 74ms ago
->
-> 449.3 days ago
+```text
+2019-11-30T21:23:40.890Z
+2019-11-30T13:23:40.890-08:00
+1575149020890
+3years 3months 21days 22h 34m 3s 15ms ago
+1209.0 days ago
+```
 
 ## Alfred Usage
 

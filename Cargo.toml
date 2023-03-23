@@ -2,7 +2,7 @@
 name = "timeturner"
 version = "1.8.0"
 authors = ["Stephen Duncan <jrduncans@users.noreply.github.com>"]
-edition = "2018"
+edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "Command line utility for manipulating date-time strings"
 repository = "https://github.com/jrduncans/timeturner"
@@ -14,10 +14,9 @@ categories = ["command-line-utilities", "date-and-time", "value-formatting"]
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-clap = { version = "4.1.11", features = ["derive"] }
 chrono = "0.4.24"
-chrono-tz = "0.8.1"
+clap = { version = "4.1.12", features = ["derive"] }
 serde = { version = "1.0.158", features = ["derive"] }
 serde_json = "1.0.94"
-chrono-english = "0.1.7"
 humantime = "2.1.0"
+dateparser = "0.1.8"
