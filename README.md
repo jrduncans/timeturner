@@ -12,7 +12,7 @@ To install with **cargo**:
 
 `cargo install timeturner`
 
-For use in **Alfred** download the [latest release](https://github.com/jrduncans/timeturner/releases/download/v1.8.0/timeturner.alfredworkflow)
+For use in **Alfred** download the [latest release](https://github.com/jrduncans/timeturner/releases/download/v2.0.0/timeturner.alfredworkflow)
 
 ## Usage
 
