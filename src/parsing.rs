@@ -10,7 +10,9 @@ fn parse_custom_unzoned_format(input: &str) -> Option<DateTime<Utc>> {
 }
 
 fn parse_from_format_unzoned(input: &str, format: &str) -> Option<DateTime<Utc>> {
-    Utc.datetime_from_str(input, format).ok()
+    NaiveDateTime::parse_from_str(input, format)
+        .map(|d| d.and_utc())
+        .ok()
 }
 
 fn parse_with_dateparser(input: &str) -> Option<DateTime<Utc>> {
