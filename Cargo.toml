@@ -15,8 +15,8 @@ maintenance = { status = "actively-developed" }
 
 [dependencies]
 chrono = "0.4.38"
-clap = { version = "4.5.20", features = ["derive"] }
-serde = { version = "1.0.214", features = ["derive"] }
-serde_json = "1.0.132"
+clap = { version = "4.5.21", features = ["derive"] }
+serde = { version = "1.0.215", features = ["derive"] }
+serde_json = "1.0.133"
 humantime = "2.1.0"
 dateparser = "0.2.1"
