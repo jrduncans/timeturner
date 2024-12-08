@@ -31,7 +31,7 @@ pub enum DurationUnit {
 ///
 /// Will return an error string if `input` cannot be parsed to a date.
 pub fn run(
-    input: &Option<String>,
+    input: Option<&String>,
     output_mode: &OutputMode,
     extra_duration_unit: Option<DurationUnit>,
 ) -> Result<(), &'static str> {

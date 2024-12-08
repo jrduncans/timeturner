@@ -19,7 +19,7 @@ struct Opt {
 fn main() {
     let opt: Opt = Parser::parse();
 
-    if let Err(err) = timeturner::run(&opt.input, &output_mode(&opt), opt.duration_unit) {
+    if let Err(err) = timeturner::run(opt.input.as_ref(), &output_mode(&opt), opt.duration_unit) {
         eprintln!("{err}");
         process::exit(1);
     }
