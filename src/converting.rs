@@ -50,7 +50,7 @@ pub fn convert(
             converted_text: unit_duration_since(parsed_input, now, duration_unit),
             format: ConversionFormat::DurationSinceUnits(duration_unit),
         });
-    };
+    }
 
     results
 }
