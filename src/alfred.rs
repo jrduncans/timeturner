@@ -1,5 +1,5 @@
-use super::converting::ConversionFormat;
 use super::ConversionResult;
+use super::converting::ConversionFormat;
 use serde::Serialize;
 
 #[derive(Serialize)]
