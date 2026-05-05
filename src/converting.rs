@@ -1,7 +1,6 @@
 use crate::DurationUnit;
 use chrono::prelude::*;
 use humantime::format_duration;
-use std::convert::TryInto;
 use std::time::Duration;
 
 #[derive(PartialEq, Eq, Debug)]
@@ -59,9 +58,8 @@ pub fn human_duration_since(input: &DateTime<Utc>, now: &DateTime<Utc>) -> Strin
     let difference_millis = now.timestamp_millis() - input.timestamp_millis();
 
     let in_future = difference_millis.is_negative();
-    let difference_millis = difference_millis.abs();
 
-    let duration = Duration::from_millis(difference_millis.try_into().unwrap());
+    let duration = Duration::from_millis(difference_millis.unsigned_abs());
     let duration_format = format_duration(duration);
 
     if in_future {
@@ -79,7 +77,7 @@ pub fn unit_duration_since(
     let difference_millis = now.timestamp_millis() - input.timestamp_millis();
 
     let in_future = difference_millis.is_negative();
-    let difference_millis = difference_millis.abs();
+    let difference_millis = difference_millis.unsigned_abs();
 
     let duration_format = match duration_unit {
         DurationUnit::Milliseconds => format!("{difference_millis} ms"),
@@ -108,8 +106,8 @@ pub fn unit_duration_since(
     }
 }
 
-#[allow(clippy::cast_possible_truncation, clippy::cast_precision_loss)]
-fn rounded_division(value: i64, units: &str, divide_by: f64) -> String {
+#[allow(clippy::cast_precision_loss)]
+fn rounded_division(value: u64, units: &str, divide_by: f64) -> String {
     format!("{:.1} {units}", value as f64 / divide_by)
 }
 
