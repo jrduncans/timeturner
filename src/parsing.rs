@@ -16,12 +16,11 @@ fn parse_from_format_unzoned(input: &str, format: &str) -> Option<DateTime<Utc>>
 }
 
 fn parse_with_dateparser(input: &str) -> Option<DateTime<Utc>> {
-    let midnight = NaiveTime::from_hms_opt(0, 0, 0).unwrap();
-    parse_with(input, &Utc, midnight).ok()
+    parse_with(input, &Utc, NaiveTime::MIN).ok()
 }
 
-pub fn parse_input(input: Option<&String>) -> Result<DateTime<Utc>, &'static str> {
-    input.as_ref().filter(|i| !i.trim().is_empty()).map_or_else(
+pub fn parse_input(input: Option<&str>) -> Result<DateTime<Utc>, &'static str> {
+    input.filter(|i| !i.trim().is_empty()).map_or_else(
         || Ok(Utc::now()),
         |i| {
             parse_with_dateparser(i)

@@ -25,10 +25,7 @@ pub fn output_json(conversion_results: &[ConversionResult]) -> String {
                 ConversionFormat::EpochMillis => String::from("epoch_millis"),
                 ConversionFormat::DurationSince => String::from("duration_since"),
                 ConversionFormat::DurationSinceUnits(duration_unit) => {
-                    format!(
-                        "duration_since_{}",
-                        format!("{duration_unit:?}").to_lowercase()
-                    )
+                    format!("duration_since_{duration_unit:?}").to_lowercase()
                 }
             },
             title: conversion_result.converted_text.clone(),
