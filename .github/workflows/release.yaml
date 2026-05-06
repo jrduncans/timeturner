@@ -101,3 +101,47 @@ jobs:
           timeturner-${{ github.ref_name }}-aarch64-apple-darwin.zip
           timeturner-${{ github.ref_name }}-x86_64-apple-darwin.zip
           timeturner-${{ github.ref_name }}-x86_64-unknown-linux-musl.zip
+
+    - name: Update Homebrew Tap
+      env:
+        TAP_TOKEN: ${{ secrets.TAP_REPO_TOKEN }}
+      run: |
+        VERSION_NUM="${{ github.ref_name }}"
+        VERSION_NUM="${VERSION_NUM#v}"
+        SHA_ARM64=$(shasum -a 256 "timeturner-${{ github.ref_name }}-aarch64-apple-darwin.zip" | cut -d' ' -f1)
+        SHA_X86_64=$(shasum -a 256 "timeturner-${{ github.ref_name }}-x86_64-apple-darwin.zip" | cut -d' ' -f1)
+        SHA_LINUX=$(shasum -a 256 "timeturner-${{ github.ref_name }}-x86_64-unknown-linux-musl.zip" | cut -d' ' -f1)
+
+        git clone "https://x-access-token:${TAP_TOKEN}@github.com/jrduncans/homebrew-timeturner.git" tap
+        cd tap
+
+        cat > HomebrewFormula/timeturner.rb << EOF
+        class Timeturner < Formula
+          version '${VERSION_NUM}'
+          desc "Command line utility for manipulating date-time strings"
+          homepage "https://github.com/jrduncans/timeturner"
+
+          if OS.mac?
+            if Hardware::CPU.arm?
+              url "https://github.com/jrduncans/timeturner/releases/download/v${VERSION_NUM}/timeturner-v${VERSION_NUM}-aarch64-apple-darwin.zip"
+              sha256 "${SHA_ARM64}"
+            else
+              url "https://github.com/jrduncans/timeturner/releases/download/v${VERSION_NUM}/timeturner-v${VERSION_NUM}-x86_64-apple-darwin.zip"
+              sha256 "${SHA_X86_64}"
+            end
+          elsif OS.linux?
+            url "https://github.com/jrduncans/timeturner/releases/download/v${VERSION_NUM}/timeturner-v${VERSION_NUM}-x86_64-unknown-linux-musl.zip"
+            sha256 "${SHA_LINUX}"
+          end
+
+          def install
+            bin.install "timeturner"
+          end
+        end
+        EOF
+
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add HomebrewFormula/timeturner.rb
+        git commit -m "Update to ${VERSION_NUM}"
+        git push
