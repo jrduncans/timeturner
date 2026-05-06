@@ -19,4 +19,6 @@ See [CLAUDE.md](CLAUDE.md) for build, test, lint, and format commands.
    git push origin vX.Y.Z
    ```
 
-Pushing the tag triggers the release workflow, which builds binaries for all targets (x86_64 Linux musl, x86_64 macOS, aarch64 macOS, universal macOS), and publishes a GitHub release with zip archives and auto-generated release notes.
+Pushing the tag triggers the release workflow, which builds binaries for all targets (x86_64 Linux musl, x86_64 macOS, aarch64 macOS, universal macOS), publishes a GitHub release with zip archives and auto-generated release notes, and runs `cargo publish` to release to crates.io.
+
+The workflow requires a `CARGO_REGISTRY_TOKEN` secret set in the repository settings with a crates.io API token that has publish permission for the `timeturner` crate.

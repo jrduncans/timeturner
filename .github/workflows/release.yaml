@@ -93,3 +93,11 @@ jobs:
           timeturner-${{ github.ref_name }}-aarch64-apple-darwin.zip
           timeturner-${{ github.ref_name }}-x86_64-apple-darwin.zip
           timeturner-${{ github.ref_name }}-x86_64-unknown-linux-musl.zip
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Publish to crates.io
+      run: cargo publish
+      env:
+        CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
