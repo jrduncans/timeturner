@@ -1,29 +1,58 @@
 use chrono::prelude::*;
-use dateparser::parse_with;
+use speedate::DateTime as SpeedDateTime;
 
-const CUSTOM_UNZONED_FORMATS: [&str; 3] = ["%F %T,%3f", "%d %b %Y %H:%M:%S,%3f", "%T%.3f UTC %F"];
+// Formats speedate doesn't handle: comma decimal, "UTC" text suffix, English month names
+const CUSTOM_UNZONED_FORMATS: [&str; 6] = [
+    "%F %T,%3f",
+    "%d %b %Y %H:%M:%S%.f",
+    "%d %b %Y %H:%M:%S,%3f",
+    "%F %T%.f UTC",
+    "%T UTC %F",
+    "%B %d, %Y %H:%M",
+];
 
 fn parse_custom_unzoned_format(input: &str) -> Option<DateTime<Utc>> {
-    CUSTOM_UNZONED_FORMATS
-        .iter()
-        .find_map(|s| parse_from_format_unzoned(input, s))
+    CUSTOM_UNZONED_FORMATS.iter().find_map(|s| {
+        NaiveDateTime::parse_from_str(input, s)
+            .ok()
+            .map(|d| d.and_utc())
+    })
 }
 
-fn parse_from_format_unzoned(input: &str, format: &str) -> Option<DateTime<Utc>> {
-    NaiveDateTime::parse_from_str(input, format)
-        .map(|d| d.and_utc())
+fn speedate_to_chrono(dt: SpeedDateTime) -> Option<DateTime<Utc>> {
+    let naive = NaiveDateTime::new(
+        NaiveDate::from_ymd_opt(
+            dt.date.year.into(),
+            dt.date.month.into(),
+            dt.date.day.into(),
+        )?,
+        NaiveTime::from_hms_micro_opt(
+            dt.time.hour.into(),
+            dt.time.minute.into(),
+            dt.time.second.into(),
+            dt.time.microsecond,
+        )?,
+    );
+    Some(match dt.time.tz_offset {
+        Some(offset_secs) => FixedOffset::east_opt(offset_secs)?
+            .from_local_datetime(&naive)
+            .single()?
+            .to_utc(),
+        None => naive.and_utc(),
+    })
+}
+
+fn parse_with_speedate(input: &str) -> Option<DateTime<Utc>> {
+    SpeedDateTime::parse_str(input)
         .ok()
-}
-
-fn parse_with_dateparser(input: &str) -> Option<DateTime<Utc>> {
-    parse_with(input, &Utc, NaiveTime::MIN).ok()
+        .and_then(speedate_to_chrono)
 }
 
 pub fn parse_input(input: Option<&str>) -> Result<DateTime<Utc>, &'static str> {
     input.filter(|i| !i.trim().is_empty()).map_or_else(
         || Ok(Utc::now()),
         |i| {
-            parse_with_dateparser(i)
+            parse_with_speedate(i)
                 .or_else(|| parse_custom_unzoned_format(i))
                 .ok_or("Input format not recognized")
         },
@@ -93,6 +122,36 @@ mod tests {
     #[test]
     fn rfc3339_input_space_instead_of_t() {
         let result = parse_input(Some(&String::from("2019-10-27 15:03:19.747-07:00"))).unwrap();
+        assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
+    }
+
+    #[test]
+    fn rfc3339_input_lowercase_t() {
+        let result = parse_input(Some(&String::from("2019-10-27t15:03:19.747-07:00"))).unwrap();
+        assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
+    }
+
+    #[test]
+    fn rfc3339_no_offset_assumed_utc() {
+        let result = parse_input(Some(&String::from("2019-10-27T22:03:19.747"))).unwrap();
+        assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
+    }
+
+    #[test]
+    fn rfc3339_no_offset_no_millis_assumed_utc() {
+        let result = parse_input(Some(&String::from("2019-10-27T22:03:19"))).unwrap();
+        assert_eq!(result, Utc.timestamp_millis_opt(1572213799000).unwrap());
+    }
+
+    #[test]
+    fn rfc3339_lowercase_t_no_offset_assumed_utc() {
+        let result = parse_input(Some(&String::from("2019-10-27t22:03:19.747"))).unwrap();
+        assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
+    }
+
+    #[test]
+    fn rfc3339_space_separator_no_offset_assumed_utc() {
+        let result = parse_input(Some(&String::from("2019-10-27 22:03:19.747"))).unwrap();
         assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
     }
 
