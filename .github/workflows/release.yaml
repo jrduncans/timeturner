@@ -61,17 +61,17 @@ jobs:
       env:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: timeturner-x86_64-unknown-linux-musl
         path: timeturner-x86_64-unknown-linux-musl
 
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: timeturner-x86_64-apple-darwin
         path: timeturner-x86_64-apple-darwin
 
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: timeturner-aarch64-apple-darwin
         path: timeturner-aarch64-apple-darwin
