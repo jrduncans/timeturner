@@ -2,11 +2,18 @@ use chrono::prelude::*;
 use speedate::DateTime as SpeedDateTime;
 
 // Formats speedate doesn't handle; all are interpreted as UTC
-const CUSTOM_UTC_FORMATS: [&str; 4] = [
+const CUSTOM_UTC_FORMATS: [&str; 5] = [
     "%d %b %Y %H:%M:%S%.f", // 03 Feb 2020 01:03:10.534
     "%F %T%.f UTC",          // 2019-11-22 09:03:44.00 UTC
     "%T UTC %F",             // 04:10:39 UTC 2020-02-17
     "%B %d, %Y %H:%M",      // May 23, 2020 12:00
+    "%a %b %e %T UTC %Y",   // Sun Oct 27 22:03:19 UTC 2019 (Go UnixDate)
+];
+
+// Formats with an embedded timezone offset
+const CUSTOM_ZONED_FORMATS: [&str; 2] = [
+    "%d/%b/%Y:%T %z",        // 27/Oct/2019:22:03:19 +0000 (nginx access log)
+    "%a %b %d %Y %T GMT%z",  // Sun Oct 27 2019 22:03:19 GMT-0700 (JS Date.toString(), suffix stripped)
 ];
 
 fn parse_custom_utc_format(input: &str) -> Option<DateTime<Utc>> {
@@ -15,6 +22,23 @@ fn parse_custom_utc_format(input: &str) -> Option<DateTime<Utc>> {
             .ok()
             .map(|d| d.and_utc())
     })
+}
+
+fn parse_custom_zoned_format(input: &str) -> Option<DateTime<Utc>> {
+    CUSTOM_ZONED_FORMATS.iter().find_map(|s| {
+        DateTime::parse_from_str(input, s)
+            .ok()
+            .map(|d| d.to_utc())
+    })
+}
+
+// Strips " (Timezone Name)" suffix produced by JS Date.toString()
+fn strip_js_tz_name(input: &str) -> Option<String> {
+    if input.ends_with(')') {
+        input.rfind(" (").map(|pos| input[..pos].to_string())
+    } else {
+        None
+    }
 }
 
 fn speedate_to_chrono(dt: SpeedDateTime) -> Option<DateTime<Utc>> {
@@ -63,6 +87,10 @@ fn replace_comma_decimal(input: &str) -> Option<String> {
     if changed { Some(result) } else { None }
 }
 
+fn parse_with_dateparser(input: &str) -> Option<DateTime<Utc>> {
+    dateparser::parse_with_timezone(input, &Utc).ok()
+}
+
 fn parse_with_speedate(input: &str) -> Option<DateTime<Utc>> {
     SpeedDateTime::parse_str(input)
         .ok()
@@ -81,6 +109,11 @@ pub fn parse_input(input: Option<&str>) -> Result<DateTime<Utc>, &'static str> {
                             .or_else(|| parse_custom_utc_format(&normalized))
                     })
                 })
+                .or_else(|| parse_custom_zoned_format(i))
+                .or_else(|| {
+                    strip_js_tz_name(i).and_then(|s| parse_custom_zoned_format(&s))
+                })
+                .or_else(|| parse_with_dateparser(i))
                 .ok_or("Input format not recognized")
         },
     )
@@ -252,5 +285,64 @@ mod tests {
     fn invalid_input() {
         let result = parse_input(Some(&String::from("not a date"))).err();
         assert_eq!(result, Some("Input format not recognized"));
+    }
+
+    // nginx/Apache combined access log: 27/Oct/2019:22:03:19 +0000
+    #[test]
+    fn nginx_access_log_format() {
+        let result = parse_input(Some(&String::from("27/Oct/2019:22:03:19 +0000"))).unwrap();
+        assert_eq!(result, Utc.timestamp_millis_opt(1572213799000).unwrap());
+    }
+
+    #[test]
+    fn nginx_access_log_format_nonzero_offset() {
+        let result = parse_input(Some(&String::from("27/Oct/2019:15:03:19 -0700"))).unwrap();
+        assert_eq!(result, Utc.timestamp_millis_opt(1572213799000).unwrap());
+    }
+
+    // HTTP date (RFC 7231): always GMT
+    #[test]
+    fn http_date_rfc7231() {
+        let result = parse_input(Some(&String::from("Sun, 27 Oct 2019 22:03:19 GMT"))).unwrap();
+        assert_eq!(result, Utc.timestamp_millis_opt(1572213799000).unwrap());
+    }
+
+    // RFC 2822 with numeric offset
+    #[test]
+    fn rfc2822_numeric_utc_offset() {
+        let result = parse_input(Some(&String::from("Sun, 27 Oct 2019 22:03:19 +0000"))).unwrap();
+        assert_eq!(result, Utc.timestamp_millis_opt(1572213799000).unwrap());
+    }
+
+    #[test]
+    fn rfc2822_nonzero_offset() {
+        let result = parse_input(Some(&String::from("Sun, 27 Oct 2019 15:03:19 -0700"))).unwrap();
+        assert_eq!(result, Utc.timestamp_millis_opt(1572213799000).unwrap());
+    }
+
+    // Go UnixDate / output of Unix `date` command: Sun Oct 27 22:03:19 UTC 2019
+    #[test]
+    fn go_unix_date_format() {
+        let result = parse_input(Some(&String::from("Sun Oct 27 22:03:19 UTC 2019"))).unwrap();
+        assert_eq!(result, Utc.timestamp_millis_opt(1572213799000).unwrap());
+    }
+
+    // JavaScript Date.toString(): Sun Oct 27 2019 22:03:19 GMT+0000 (Coordinated Universal Time)
+    #[test]
+    fn javascript_date_tostring_utc() {
+        let result = parse_input(Some(&String::from(
+            "Sun Oct 27 2019 22:03:19 GMT+0000 (Coordinated Universal Time)",
+        )))
+        .unwrap();
+        assert_eq!(result, Utc.timestamp_millis_opt(1572213799000).unwrap());
+    }
+
+    #[test]
+    fn javascript_date_tostring_nonzero_offset() {
+        let result = parse_input(Some(&String::from(
+            "Sun Oct 27 2019 15:03:19 GMT-0700 (Pacific Daylight Time)",
+        )))
+        .unwrap();
+        assert_eq!(result, Utc.timestamp_millis_opt(1572213799000).unwrap());
     }
 }

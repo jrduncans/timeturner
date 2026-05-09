@@ -18,5 +18,6 @@ chrono = "0.4.44"
 clap = { version = "4.6.1", features = ["derive"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
+dateparser = "0.3.1"
 humantime = "2.3.0"
 speedate = "0.17.0"
