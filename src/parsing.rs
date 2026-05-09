@@ -1,16 +1,16 @@
 use chrono::prelude::*;
 use speedate::DateTime as SpeedDateTime;
 
-// Formats speedate doesn't handle: "UTC" text suffix, English month names
-const CUSTOM_UNZONED_FORMATS: [&str; 4] = [
-    "%d %b %Y %H:%M:%S%.f",
-    "%F %T%.f UTC",
-    "%T UTC %F",
-    "%B %d, %Y %H:%M",
+// Formats speedate doesn't handle; all are interpreted as UTC
+const CUSTOM_UTC_FORMATS: [&str; 4] = [
+    "%d %b %Y %H:%M:%S%.f", // 03 Feb 2020 01:03:10.534
+    "%F %T%.f UTC",          // 2019-11-22 09:03:44.00 UTC
+    "%T UTC %F",             // 04:10:39 UTC 2020-02-17
+    "%B %d, %Y %H:%M",      // May 23, 2020 12:00
 ];
 
-fn parse_custom_unzoned_format(input: &str) -> Option<DateTime<Utc>> {
-    CUSTOM_UNZONED_FORMATS.iter().find_map(|s| {
+fn parse_custom_utc_format(input: &str) -> Option<DateTime<Utc>> {
+    CUSTOM_UTC_FORMATS.iter().find_map(|s| {
         NaiveDateTime::parse_from_str(input, s)
             .ok()
             .map(|d| d.and_utc())
@@ -74,11 +74,11 @@ pub fn parse_input(input: Option<&str>) -> Result<DateTime<Utc>, &'static str> {
         || Ok(Utc::now()),
         |i| {
             parse_with_speedate(i)
-                .or_else(|| parse_custom_unzoned_format(i))
+                .or_else(|| parse_custom_utc_format(i))
                 .or_else(|| {
                     replace_comma_decimal(i).and_then(|normalized| {
                         parse_with_speedate(&normalized)
-                            .or_else(|| parse_custom_unzoned_format(&normalized))
+                            .or_else(|| parse_custom_utc_format(&normalized))
                     })
                 })
                 .ok_or("Input format not recognized")
