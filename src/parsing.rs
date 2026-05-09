@@ -1,11 +1,9 @@
 use chrono::prelude::*;
 use speedate::DateTime as SpeedDateTime;
 
-// Formats speedate doesn't handle: comma decimal, "UTC" text suffix, English month names
-const CUSTOM_UNZONED_FORMATS: [&str; 6] = [
-    "%F %T,%3f",
+// Formats speedate doesn't handle: "UTC" text suffix, English month names
+const CUSTOM_UNZONED_FORMATS: [&str; 4] = [
     "%d %b %Y %H:%M:%S%.f",
-    "%d %b %Y %H:%M:%S,%3f",
     "%F %T%.f UTC",
     "%T UTC %F",
     "%B %d, %Y %H:%M",
@@ -42,6 +40,29 @@ fn speedate_to_chrono(dt: SpeedDateTime) -> Option<DateTime<Utc>> {
     })
 }
 
+fn replace_comma_decimal(input: &str) -> Option<String> {
+    let chars: Vec<char> = input.chars().collect();
+    let mut changed = false;
+    let result: String = chars
+        .iter()
+        .enumerate()
+        .map(|(i, &c)| {
+            if c == ','
+                && i > 0
+                && chars[i - 1].is_ascii_digit()
+                && i + 1 < chars.len()
+                && chars[i + 1].is_ascii_digit()
+            {
+                changed = true;
+                '.'
+            } else {
+                c
+            }
+        })
+        .collect();
+    if changed { Some(result) } else { None }
+}
+
 fn parse_with_speedate(input: &str) -> Option<DateTime<Utc>> {
     SpeedDateTime::parse_str(input)
         .ok()
@@ -54,6 +75,12 @@ pub fn parse_input(input: Option<&str>) -> Result<DateTime<Utc>, &'static str> {
         |i| {
             parse_with_speedate(i)
                 .or_else(|| parse_custom_unzoned_format(i))
+                .or_else(|| {
+                    replace_comma_decimal(i).and_then(|normalized| {
+                        parse_with_speedate(&normalized)
+                            .or_else(|| parse_custom_unzoned_format(&normalized))
+                    })
+                })
                 .ok_or("Input format not recognized")
         },
     )
@@ -159,6 +186,18 @@ mod tests {
     fn custom_unzoned_rfc3339_like_with_space_and_comma() {
         let result = parse_input(Some(&String::from("2020-12-17 00:00:34,247"))).unwrap();
         assert_eq!(result, Utc.timestamp_millis_opt(1608163234247).unwrap());
+    }
+
+    #[test]
+    fn rfc3339_input_comma_decimal_zulu() {
+        let result = parse_input(Some(&String::from("2019-10-27T22:03:19,747Z"))).unwrap();
+        assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
+    }
+
+    #[test]
+    fn rfc3339_input_comma_decimal_with_offset() {
+        let result = parse_input(Some(&String::from("2019-10-27T15:03:19,747-07:00"))).unwrap();
+        assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
     }
 
     #[test]
