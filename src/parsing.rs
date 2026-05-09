@@ -4,16 +4,16 @@ use speedate::DateTime as SpeedDateTime;
 // Formats speedate doesn't handle; all are interpreted as UTC
 const CUSTOM_UTC_FORMATS: [&str; 5] = [
     "%d %b %Y %H:%M:%S%.f", // 03 Feb 2020 01:03:10.534
-    "%F %T%.f UTC",          // 2019-11-22 09:03:44.00 UTC
-    "%T UTC %F",             // 04:10:39 UTC 2020-02-17
+    "%F %T%.f UTC",         // 2019-11-22 09:03:44.00 UTC
+    "%T UTC %F",            // 04:10:39 UTC 2020-02-17
     "%B %d, %Y %H:%M",      // May 23, 2020 12:00
     "%a %b %e %T UTC %Y",   // Sun Oct 27 22:03:19 UTC 2019 (Go UnixDate)
 ];
 
 // Formats with an embedded timezone offset
 const CUSTOM_ZONED_FORMATS: [&str; 2] = [
-    "%d/%b/%Y:%T %z",        // 27/Oct/2019:22:03:19 +0000 (nginx access log)
-    "%a %b %d %Y %T GMT%z",  // Sun Oct 27 2019 22:03:19 GMT-0700 (JS Date.toString(), suffix stripped)
+    "%d/%b/%Y:%T %z",       // 27/Oct/2019:22:03:19 +0000 (nginx access log)
+    "%a %b %d %Y %T GMT%z", // Sun Oct 27 2019 22:03:19 GMT-0700 (JS Date.toString(), suffix stripped)
 ];
 
 fn parse_custom_utc_format(input: &str) -> Option<DateTime<Utc>> {
@@ -25,11 +25,9 @@ fn parse_custom_utc_format(input: &str) -> Option<DateTime<Utc>> {
 }
 
 fn parse_custom_zoned_format(input: &str) -> Option<DateTime<Utc>> {
-    CUSTOM_ZONED_FORMATS.iter().find_map(|s| {
-        DateTime::parse_from_str(input, s)
-            .ok()
-            .map(|d| d.to_utc())
-    })
+    CUSTOM_ZONED_FORMATS
+        .iter()
+        .find_map(|s| DateTime::parse_from_str(input, s).ok().map(|d| d.to_utc()))
 }
 
 // Strips " (Timezone Name)" suffix produced by JS Date.toString()
@@ -110,9 +108,7 @@ pub fn parse_input(input: Option<&str>) -> Result<DateTime<Utc>, &'static str> {
                     })
                 })
                 .or_else(|| parse_custom_zoned_format(i))
-                .or_else(|| {
-                    strip_js_tz_name(i).and_then(|s| parse_custom_zoned_format(&s))
-                })
+                .or_else(|| strip_js_tz_name(i).and_then(|s| parse_custom_zoned_format(&s)))
                 .or_else(|| parse_with_dateparser(i))
                 .ok_or("Input format not recognized")
         },
