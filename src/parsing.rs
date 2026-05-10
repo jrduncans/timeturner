@@ -85,6 +85,29 @@ fn replace_comma_decimal(input: &str) -> Option<String> {
     if changed { Some(result) } else { None }
 }
 
+// Parses pure-digit epoch strings where the unit is inferred from digit count:
+//   13 digits → milliseconds (handled by speedate/dateparser)
+//   16 digits → microseconds: range 2001-09-09 to 2286-11-20 UTC
+//   19 digits → nanoseconds:  range 2001-09-09 to 2262-04-11 UTC (capped by i64::MAX)
+// Only handles positive (post-epoch) values; pre-1970 would require a leading minus sign.
+fn parse_epoch_by_digit_count(input: &str) -> Option<DateTime<Utc>> {
+    let s = input.trim();
+    if !s.bytes().all(|b| b.is_ascii_digit()) {
+        return None;
+    }
+    match s.len() {
+        16 => {
+            let micros: i64 = s.parse().ok()?;
+            Utc.timestamp_millis_opt(micros / 1_000).single()
+        }
+        19 => {
+            let nanos: i64 = s.parse().ok()?;
+            Utc.timestamp_millis_opt(nanos / 1_000_000).single()
+        }
+        _ => None,
+    }
+}
+
 fn parse_with_dateparser(input: &str) -> Option<DateTime<Utc>> {
     dateparser::parse_with_timezone(input, &Utc).ok()
 }
@@ -99,7 +122,8 @@ pub fn parse_input(input: Option<&str>) -> Result<DateTime<Utc>, &'static str> {
     input.filter(|i| !i.trim().is_empty()).map_or_else(
         || Ok(Utc::now()),
         |i| {
-            parse_with_speedate(i)
+            parse_epoch_by_digit_count(i)
+                .or_else(|| parse_with_speedate(i))
                 .or_else(|| parse_custom_utc_format(i))
                 .or_else(|| {
                     replace_comma_decimal(i).and_then(|normalized| {
@@ -155,6 +179,32 @@ mod tests {
     fn epoch_millis_input() {
         let result = parse_input(Some(&String::from("1572213799747"))).unwrap();
         assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
+    }
+
+    #[test]
+    fn epoch_micros_input() {
+        let result = parse_input(Some(&String::from("1572213799747000"))).unwrap();
+        assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
+    }
+
+    #[test]
+    fn epoch_nanos_input() {
+        let result = parse_input(Some(&String::from("1572213799747000000"))).unwrap();
+        assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
+    }
+
+    // Boundary: smallest 16-digit microsecond value → 2001-09-09T01:46:40 UTC
+    #[test]
+    fn epoch_micros_min_16_digit() {
+        let result = parse_input(Some(&String::from("1000000000000000"))).unwrap();
+        assert_eq!(result, Utc.timestamp_millis_opt(1_000_000_000_000).unwrap());
+    }
+
+    // Boundary: smallest 19-digit nanosecond value → 2001-09-09T01:46:40 UTC
+    #[test]
+    fn epoch_nanos_min_19_digit() {
+        let result = parse_input(Some(&String::from("1000000000000000000"))).unwrap();
+        assert_eq!(result, Utc.timestamp_millis_opt(1_000_000_000_000).unwrap());
     }
 
     #[test]
