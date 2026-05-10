@@ -81,6 +81,15 @@ jobs:
         mkdir -p timeturner-universal-apple-darwin
         lipo -create -output timeturner-universal-apple-darwin/timeturner timeturner-x86_64-apple-darwin/timeturner timeturner-aarch64-apple-darwin/timeturner
 
+    - name: Create Alfred Workflow
+      run: |
+        cp alfred/info.plist alfred/icon.png timeturner-universal-apple-darwin/
+        VERSION_NUM="${{ github.ref_name }}"
+        VERSION_NUM="${VERSION_NUM#v}"
+        /usr/libexec/PlistBuddy -c "Set :version ${VERSION_NUM}" timeturner-universal-apple-darwin/info.plist
+        cd timeturner-universal-apple-darwin
+        zip ../timeturner.alfredworkflow icon.png info.plist timeturner
+
     - name: Create Zip Files
       shell: bash
       run: |
@@ -100,6 +109,7 @@ jobs:
           timeturner-${{ github.ref_name }}-universal-apple-darwin.zip
           timeturner-${{ github.ref_name }}-aarch64-apple-darwin.zip
           timeturner-${{ github.ref_name }}-x86_64-apple-darwin.zip
+          timeturner.alfredworkflow
           timeturner-${{ github.ref_name }}-x86_64-unknown-linux-musl.zip
 
     - name: Update Homebrew Tap
