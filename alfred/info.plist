@@ -73,7 +73,7 @@
 				<key>runningsubtext</key>
 				<string>parsing</string>
 				<key>script</key>
-				<string>./timeturner --alfred "{query}"
+				<string>xattr -d com.apple.quarantine ./timeturner 2>/dev/null; ./timeturner --alfred "{query}"
 </string>
 				<key>scriptargtype</key>
 				<integer>0</integer>
@@ -142,7 +142,7 @@
 				<key>runningsubtext</key>
 				<string>parsing</string>
 				<key>script</key>
-				<string>./timeturner --alfred "{query}"
+				<string>xattr -d com.apple.quarantine ./timeturner 2>/dev/null; ./timeturner --alfred "{query}"
 </string>
 				<key>scriptargtype</key>
 				<integer>0</integer>
