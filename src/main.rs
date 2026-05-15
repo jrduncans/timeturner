@@ -6,7 +6,7 @@ use timeturner::EpochUnit;
 use timeturner::OutputMode;
 
 #[derive(Debug, Parser)]
-#[command(name = "timeturner", about = "Manipulate date-time strings")]
+#[command(name = "timeturner", about = "Manipulate date-time strings", version)]
 struct Opt {
     #[arg(long, help = "Output in JSON for Alfred Workflow integration")]
     alfred: bool,
