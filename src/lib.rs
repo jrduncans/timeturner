@@ -22,6 +22,18 @@ pub enum DurationUnit {
     Fortnights,
 }
 
+#[derive(PartialEq, Eq, Debug, Clone, Copy, ValueEnum)]
+pub enum EpochUnit {
+    #[value(alias = "s")]
+    Seconds,
+    #[value(alias = "ms")]
+    Millis,
+    #[value(alias = "us")]
+    Micros,
+    #[value(alias = "ns")]
+    Nanos,
+}
+
 /// Takes an optional input and prints conversions to different date-time formats.
 /// If an input string is not given, then `now` is used.
 /// If the input format cannot be handled, a string suitable for display to the user
@@ -34,8 +46,9 @@ pub fn run(
     input: Option<&str>,
     output_mode: &OutputMode,
     extra_duration_unit: Option<DurationUnit>,
+    epoch_unit: Option<EpochUnit>,
 ) -> Result<(), &'static str> {
-    let parsed_input = parsing::parse_input(input)?;
+    let parsed_input = parsing::parse_input(input, epoch_unit)?;
     let conversion_results = converting::convert(&parsed_input, &Utc::now(), extra_duration_unit);
 
     match output_mode {
