@@ -117,10 +117,16 @@ mod tests {
 
     use super::*;
 
+    fn datetime_from_millis(millis: i64) -> DateTime<Utc> {
+        Utc.timestamp_millis_opt(millis)
+            .single()
+            .expect("valid millis")
+    }
+
     #[test]
     fn missing_input() {
-        let now = Utc.timestamp_millis_opt(1572303922748).unwrap();
-        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
+        let now = datetime_from_millis(1572303922748);
+        let date = datetime_from_millis(1572213799747);
         let result = convert(&date, &now, None);
 
         assert_eq!(
@@ -150,8 +156,8 @@ mod tests {
 
     #[test]
     fn epoch_millis_input() {
-        let now = Utc.timestamp_millis_opt(1572123676746).unwrap();
-        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
+        let now = datetime_from_millis(1572123676746);
+        let date = datetime_from_millis(1572213799747);
         let result = convert(&date, &now, None);
 
         assert_eq!(
@@ -181,8 +187,8 @@ mod tests {
 
     #[test]
     fn rfc3339_utc() {
-        let now = Utc.timestamp_millis_opt(1572213929748).unwrap();
-        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
+        let now = datetime_from_millis(1572213929748);
+        let date = datetime_from_millis(1572213799747);
         let result = convert(&date, &now, None);
 
         assert_eq!(
@@ -214,8 +220,8 @@ mod tests {
 
     #[test]
     fn rfc3339_offset() {
-        let now = Utc.timestamp_millis_opt(1572213799749).unwrap();
-        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
+        let now = datetime_from_millis(1572213799749);
+        let date = datetime_from_millis(1572213799747);
         let result = convert(&date, &now, None);
 
         assert_eq!(
@@ -245,8 +251,8 @@ mod tests {
 
     #[test]
     fn duration_millis() {
-        let now = Utc.timestamp_millis_opt(1572123676746).unwrap();
-        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
+        let now = datetime_from_millis(1572123676746);
+        let date = datetime_from_millis(1572213799747);
         let result = convert(&date, &now, Some(DurationUnit::Milliseconds));
 
         assert_eq!(
@@ -260,8 +266,8 @@ mod tests {
 
     #[test]
     fn duration_seconds() {
-        let now = Utc.timestamp_millis_opt(1572123676746).unwrap();
-        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
+        let now = datetime_from_millis(1572123676746);
+        let date = datetime_from_millis(1572213799747);
         let result = convert(&date, &now, Some(DurationUnit::Seconds));
 
         assert_eq!(
@@ -275,8 +281,8 @@ mod tests {
 
     #[test]
     fn duration_minutes() {
-        let now = Utc.timestamp_millis_opt(1572123676746).unwrap();
-        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
+        let now = datetime_from_millis(1572123676746);
+        let date = datetime_from_millis(1572213799747);
         let result = convert(&date, &now, Some(DurationUnit::Minutes));
 
         assert_eq!(
@@ -290,8 +296,8 @@ mod tests {
 
     #[test]
     fn duration_hours() {
-        let now = Utc.timestamp_millis_opt(1572123676746).unwrap();
-        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
+        let now = datetime_from_millis(1572123676746);
+        let date = datetime_from_millis(1572213799747);
         let result = convert(&date, &now, Some(DurationUnit::Hours));
 
         assert_eq!(
@@ -305,8 +311,8 @@ mod tests {
 
     #[test]
     fn duration_days() {
-        let now = Utc.timestamp_millis_opt(1572123676746).unwrap();
-        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
+        let now = datetime_from_millis(1572123676746);
+        let date = datetime_from_millis(1572213799747);
         let result = convert(&date, &now, Some(DurationUnit::Days));
 
         assert_eq!(
@@ -320,8 +326,8 @@ mod tests {
 
     #[test]
     fn duration_weeks() {
-        let now = Utc.timestamp_millis_opt(1572123676746).unwrap();
-        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
+        let now = datetime_from_millis(1572123676746);
+        let date = datetime_from_millis(1572213799747);
         let result = convert(&date, &now, Some(DurationUnit::Weeks));
 
         assert_eq!(
@@ -335,8 +341,8 @@ mod tests {
 
     #[test]
     fn duration_fortnights() {
-        let now = Utc.timestamp_millis_opt(1572123676746).unwrap();
-        let date = Utc.timestamp_millis_opt(1572213799747).unwrap();
+        let now = datetime_from_millis(1572123676746);
+        let date = datetime_from_millis(1572213799747);
         let result = convert(&date, &now, Some(DurationUnit::Fortnights));
 
         assert_eq!(

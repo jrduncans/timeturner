@@ -163,6 +163,12 @@ mod tests {
 
     use super::*;
 
+    fn expected_from_millis(millis: i64) -> Result<DateTime<Utc>, &'static str> {
+        Utc.timestamp_millis_opt(millis)
+            .single()
+            .ok_or("invalid millis")
+    }
+
     #[test]
     fn missing_input() {
         let now = Utc::now();
@@ -195,287 +201,347 @@ mod tests {
 
     #[test]
     fn epoch_millis_input() {
-        let result = parse_input(Some(&String::from("1572213799747")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
+        assert_eq!(
+            parse_input(Some("1572213799747"), None),
+            expected_from_millis(1572213799747),
+        );
     }
 
     #[test]
     fn epoch_micros_input() {
-        let result = parse_input(Some(&String::from("1572213799747000")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
+        assert_eq!(
+            parse_input(Some("1572213799747000"), None),
+            expected_from_millis(1572213799747),
+        );
     }
 
     #[test]
     fn epoch_nanos_input() {
-        let result = parse_input(Some(&String::from("1572213799747000000")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
+        assert_eq!(
+            parse_input(Some("1572213799747000000"), None),
+            expected_from_millis(1572213799747),
+        );
     }
 
     // Boundary: smallest 16-digit microsecond value → 2001-09-09T01:46:40 UTC
     #[test]
     fn epoch_micros_min_16_digit() {
-        let result = parse_input(Some(&String::from("1000000000000000")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1_000_000_000_000).unwrap());
+        assert_eq!(
+            parse_input(Some("1000000000000000"), None),
+            expected_from_millis(1000000000000),
+        );
     }
 
     // Boundary: smallest 19-digit nanosecond value → 2001-09-09T01:46:40 UTC
     #[test]
     fn epoch_nanos_min_19_digit() {
-        let result = parse_input(Some(&String::from("1000000000000000000")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1_000_000_000_000).unwrap());
+        assert_eq!(
+            parse_input(Some("1000000000000000000"), None),
+            expected_from_millis(1000000000000),
+        );
     }
 
     // Pre-2001: 15-digit microsecond timestamp (2000-01-01T00:00:00 UTC)
     // Previously rejected by the digit-count heuristic; now handled by range-based detection.
     #[test]
     fn epoch_micros_pre_2001() {
-        let result = parse_input(Some(&String::from("946684800000000")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(946_684_800_000).unwrap());
+        assert_eq!(
+            parse_input(Some("946684800000000"), None),
+            expected_from_millis(946684800000),
+        );
     }
 
     // Pre-2001: 18-digit nanosecond timestamp (2000-01-01T00:00:00 UTC)
     #[test]
     fn epoch_nanos_pre_2001() {
-        let result = parse_input(Some(&String::from("946684800000000000")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(946_684_800_000).unwrap());
+        assert_eq!(
+            parse_input(Some("946684800000000000"), None),
+            expected_from_millis(946684800000),
+        );
     }
 
     // 10-digit seconds timestamp now explicitly handled by parse_epoch_auto
     #[test]
     fn epoch_seconds_auto() {
-        let result = parse_input(Some(&String::from("1572213799")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799000).unwrap());
+        assert_eq!(
+            parse_input(Some("1572213799"), None),
+            expected_from_millis(1572213799000),
+        );
     }
 
     // Pre-epoch negative seconds
     #[test]
     fn epoch_negative_seconds() {
-        let result = parse_input(Some(&String::from("-1")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_opt(-1, 0).unwrap());
+        assert_eq!(parse_input(Some("-1"), None), expected_from_millis(-1000));
     }
 
     // Forced unit: 14-digit input interpreted as microseconds
     #[test]
     fn epoch_forced_micros_14_digit() {
-        let result = parse_input(
-            Some(&String::from("10000000000000")),
-            Some(EpochUnit::Micros),
-        )
-        .unwrap();
-        assert_eq!(result, Utc.timestamp_micros(10_000_000_000_000).unwrap());
+        assert_eq!(
+            parse_input(Some("10000000000000"), Some(EpochUnit::Micros)),
+            expected_from_millis(10000000000),
+        );
     }
 
     // Forced unit: seconds for a very short value
     #[test]
     fn epoch_forced_seconds_short() {
-        let result = parse_input(Some(&String::from("60")), Some(EpochUnit::Seconds)).unwrap();
-        assert_eq!(result, Utc.timestamp_opt(60, 0).unwrap());
+        assert_eq!(
+            parse_input(Some("60"), Some(EpochUnit::Seconds)),
+            expected_from_millis(60000),
+        );
     }
 
     // Forced unit rejects non-numeric input
     #[test]
     fn epoch_forced_rejects_non_numeric() {
-        let result = parse_input(Some(&String::from("2020-01-01")), Some(EpochUnit::Millis));
-        assert_eq!(result, Err("--epoch-unit requires a numeric epoch input"));
+        assert_eq!(
+            parse_input(Some("2020-01-01"), Some(EpochUnit::Millis)),
+            Err("--epoch-unit requires a numeric epoch input"),
+        );
     }
 
     #[test]
     fn rfc3339_input() {
-        let result =
-            parse_input(Some(&String::from("2019-10-27T15:03:19.747-07:00")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
+        assert_eq!(
+            parse_input(Some("2019-10-27T15:03:19.747-07:00"), None),
+            expected_from_millis(1572213799747),
+        );
     }
 
     #[test]
     fn rfc3339_input_no_partial_seconds() {
-        let result = parse_input(Some(&String::from("2019-10-27T15:03:19-07:00")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799000).unwrap());
+        assert_eq!(
+            parse_input(Some("2019-10-27T15:03:19-07:00"), None),
+            expected_from_millis(1572213799000),
+        );
     }
 
     #[test]
     fn rfc3339_input_zulu() {
-        let result = parse_input(Some(&String::from("2019-10-27T22:03:19.747Z")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
+        assert_eq!(
+            parse_input(Some("2019-10-27T22:03:19.747Z"), None),
+            expected_from_millis(1572213799747),
+        );
     }
 
     #[test]
     fn rfc3339_input_space_instead_of_t() {
-        let result =
-            parse_input(Some(&String::from("2019-10-27 15:03:19.747-07:00")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
+        assert_eq!(
+            parse_input(Some("2019-10-27 15:03:19.747-07:00"), None),
+            expected_from_millis(1572213799747),
+        );
     }
 
     #[test]
     fn rfc3339_input_lowercase_t() {
-        let result =
-            parse_input(Some(&String::from("2019-10-27t15:03:19.747-07:00")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
+        assert_eq!(
+            parse_input(Some("2019-10-27t15:03:19.747-07:00"), None),
+            expected_from_millis(1572213799747),
+        );
     }
 
     #[test]
     fn rfc3339_no_offset_assumed_utc() {
-        let result = parse_input(Some(&String::from("2019-10-27T22:03:19.747")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
+        assert_eq!(
+            parse_input(Some("2019-10-27T22:03:19.747"), None),
+            expected_from_millis(1572213799747),
+        );
     }
 
     #[test]
     fn rfc3339_no_offset_no_millis_assumed_utc() {
-        let result = parse_input(Some(&String::from("2019-10-27T22:03:19")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799000).unwrap());
+        assert_eq!(
+            parse_input(Some("2019-10-27T22:03:19"), None),
+            expected_from_millis(1572213799000),
+        );
     }
 
     #[test]
     fn rfc3339_lowercase_t_no_offset_assumed_utc() {
-        let result = parse_input(Some(&String::from("2019-10-27t22:03:19.747")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
+        assert_eq!(
+            parse_input(Some("2019-10-27t22:03:19.747"), None),
+            expected_from_millis(1572213799747),
+        );
     }
 
     #[test]
     fn rfc3339_space_separator_no_offset_assumed_utc() {
-        let result = parse_input(Some(&String::from("2019-10-27 22:03:19.747")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
+        assert_eq!(
+            parse_input(Some("2019-10-27 22:03:19.747"), None),
+            expected_from_millis(1572213799747),
+        );
     }
 
     #[test]
     fn custom_unzoned_rfc3339_like_with_space_and_comma() {
-        let result = parse_input(Some(&String::from("2020-12-17 00:00:34,247")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1608163234247).unwrap());
+        assert_eq!(
+            parse_input(Some("2020-12-17 00:00:34,247"), None),
+            expected_from_millis(1608163234247),
+        );
     }
 
     #[test]
     fn rfc3339_input_comma_decimal_zulu() {
-        let result = parse_input(Some(&String::from("2019-10-27T22:03:19,747Z")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
+        assert_eq!(
+            parse_input(Some("2019-10-27T22:03:19,747Z"), None),
+            expected_from_millis(1572213799747),
+        );
     }
 
     #[test]
     fn rfc3339_input_comma_decimal_with_offset() {
-        let result =
-            parse_input(Some(&String::from("2019-10-27T15:03:19,747-07:00")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799747).unwrap());
+        assert_eq!(
+            parse_input(Some("2019-10-27T15:03:19,747-07:00"), None),
+            expected_from_millis(1572213799747),
+        );
     }
 
     #[test]
     fn date_spelled_short_month_time_with_dot_input() {
-        let result = parse_input(Some(&String::from("03 Feb 2020 01:03:10.534")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1580691790534).unwrap());
+        assert_eq!(
+            parse_input(Some("03 Feb 2020 01:03:10.534"), None),
+            expected_from_millis(1580691790534),
+        );
     }
 
     #[test]
     fn date_spelled_short_month_time_with_comma_input() {
-        let result = parse_input(Some(&String::from("03 Feb 2020 01:03:10,534")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1580691790534).unwrap());
+        assert_eq!(
+            parse_input(Some("03 Feb 2020 01:03:10,534"), None),
+            expected_from_millis(1580691790534),
+        );
     }
 
     #[test]
     fn year_space_date_space_utc() {
-        let result = parse_input(Some(&String::from("2019-11-22 09:03:44.00 UTC")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1574413424000).unwrap());
+        assert_eq!(
+            parse_input(Some("2019-11-22 09:03:44.00 UTC"), None),
+            expected_from_millis(1574413424000),
+        );
     }
 
     #[test]
     fn time_space_utc_space_date() {
-        let result = parse_input(Some(&String::from("04:10:39 UTC 2020-02-17")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1581912639000).unwrap());
+        assert_eq!(
+            parse_input(Some("04:10:39 UTC 2020-02-17"), None),
+            expected_from_millis(1581912639000),
+        );
     }
 
     #[test]
     fn test_casssandra_zoned_no_millis() {
-        let result = parse_input(Some(&String::from("2015-03-07 00:59:56+0100")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1425686396000).unwrap());
+        assert_eq!(
+            parse_input(Some("2015-03-07 00:59:56+0100"), None),
+            expected_from_millis(1425686396000),
+        );
     }
 
     #[test]
     fn test_casssandra_zoned_millis() {
-        let result =
-            parse_input(Some(&String::from("2015-03-07 00:59:56.001+0100")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1425686396001).unwrap());
+        assert_eq!(
+            parse_input(Some("2015-03-07 00:59:56.001+0100"), None),
+            expected_from_millis(1425686396001),
+        );
     }
 
     #[test]
     fn test_mysql_datetime() {
-        let result = parse_input(Some(&String::from("2021-01-20 18:13:37.842000")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1611166417842).unwrap());
+        assert_eq!(
+            parse_input(Some("2021-01-20 18:13:37.842000"), None),
+            expected_from_millis(1611166417842),
+        );
     }
 
     #[test]
     fn english_input() {
-        let result = parse_input(Some(&String::from("May 23, 2020 12:00")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1590235200000).unwrap());
+        assert_eq!(
+            parse_input(Some("May 23, 2020 12:00"), None),
+            expected_from_millis(1590235200000),
+        );
     }
 
     #[test]
     fn invalid_input() {
-        let result = parse_input(Some(&String::from("not a date")), None).err();
-        assert_eq!(result, Some("Input format not recognized"));
+        assert_eq!(
+            parse_input(Some("not a date"), None),
+            Err("Input format not recognized"),
+        );
     }
 
     // nginx/Apache combined access log: 27/Oct/2019:22:03:19 +0000
     #[test]
     fn nginx_access_log_format() {
-        let result = parse_input(Some(&String::from("27/Oct/2019:22:03:19 +0000")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799000).unwrap());
+        assert_eq!(
+            parse_input(Some("27/Oct/2019:22:03:19 +0000"), None),
+            expected_from_millis(1572213799000),
+        );
     }
 
     #[test]
     fn nginx_access_log_format_nonzero_offset() {
-        let result = parse_input(Some(&String::from("27/Oct/2019:15:03:19 -0700")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799000).unwrap());
+        assert_eq!(
+            parse_input(Some("27/Oct/2019:15:03:19 -0700"), None),
+            expected_from_millis(1572213799000),
+        );
     }
 
     // HTTP date (RFC 7231): always GMT
     #[test]
     fn http_date_rfc7231() {
-        let result =
-            parse_input(Some(&String::from("Sun, 27 Oct 2019 22:03:19 GMT")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799000).unwrap());
+        assert_eq!(
+            parse_input(Some("Sun, 27 Oct 2019 22:03:19 GMT"), None),
+            expected_from_millis(1572213799000),
+        );
     }
 
     // RFC 2822 with numeric offset
     #[test]
     fn rfc2822_numeric_utc_offset() {
-        let result =
-            parse_input(Some(&String::from("Sun, 27 Oct 2019 22:03:19 +0000")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799000).unwrap());
+        assert_eq!(
+            parse_input(Some("Sun, 27 Oct 2019 22:03:19 +0000"), None),
+            expected_from_millis(1572213799000),
+        );
     }
 
     #[test]
     fn rfc2822_nonzero_offset() {
-        let result =
-            parse_input(Some(&String::from("Sun, 27 Oct 2019 15:03:19 -0700")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799000).unwrap());
+        assert_eq!(
+            parse_input(Some("Sun, 27 Oct 2019 15:03:19 -0700"), None),
+            expected_from_millis(1572213799000),
+        );
     }
 
     // Go UnixDate / output of Unix `date` command: Sun Oct 27 22:03:19 UTC 2019
     #[test]
     fn go_unix_date_format() {
-        let result =
-            parse_input(Some(&String::from("Sun Oct 27 22:03:19 UTC 2019")), None).unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799000).unwrap());
+        assert_eq!(
+            parse_input(Some("Sun Oct 27 22:03:19 UTC 2019"), None),
+            expected_from_millis(1572213799000),
+        );
     }
 
     // JavaScript Date.toString(): Sun Oct 27 2019 22:03:19 GMT+0000 (Coordinated Universal Time)
     #[test]
     fn javascript_date_tostring_utc() {
-        let result = parse_input(
-            Some(&String::from(
-                "Sun Oct 27 2019 22:03:19 GMT+0000 (Coordinated Universal Time)",
-            )),
-            None,
-        )
-        .unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799000).unwrap());
+        assert_eq!(
+            parse_input(
+                Some("Sun Oct 27 2019 22:03:19 GMT+0000 (Coordinated Universal Time)"),
+                None,
+            ),
+            expected_from_millis(1572213799000),
+        );
     }
 
     #[test]
     fn javascript_date_tostring_nonzero_offset() {
-        let result = parse_input(
-            Some(&String::from(
-                "Sun Oct 27 2019 15:03:19 GMT-0700 (Pacific Daylight Time)",
-            )),
-            None,
-        )
-        .unwrap();
-        assert_eq!(result, Utc.timestamp_millis_opt(1572213799000).unwrap());
+        assert_eq!(
+            parse_input(
+                Some("Sun Oct 27 2019 15:03:19 GMT-0700 (Pacific Daylight Time)"),
+                None,
+            ),
+            expected_from_millis(1572213799000),
+        );
     }
 }
