@@ -1,5 +1,5 @@
-use super::ConversionResult;
-use super::converting::ConversionFormat;
+use super::OutputFormat;
+use super::converting::ConversionResult;
 use serde::Serialize;
 
 #[derive(Serialize)]
@@ -20,21 +20,25 @@ pub fn output_json(conversion_results: &[ConversionResult]) -> String {
         .iter()
         .map(|conversion_result| Item {
             uid: match &conversion_result.format {
-                ConversionFormat::Rfc3339Utc => String::from("rfc3339_utc"),
-                ConversionFormat::Rfc3339Local => String::from("rfc3339_local"),
-                ConversionFormat::EpochMillis => String::from("epoch_millis"),
-                ConversionFormat::DurationSince => String::from("duration_since"),
-                ConversionFormat::DurationSinceUnits(duration_unit) => {
+                OutputFormat::Utc => String::from("utc"),
+                OutputFormat::Zoned => String::from("zoned"),
+                OutputFormat::Seconds => String::from("seconds"),
+                OutputFormat::Millis => String::from("millis"),
+                OutputFormat::Nanos => String::from("nanos"),
+                OutputFormat::Duration => String::from("duration"),
+                OutputFormat::DurationSinceUnits(duration_unit) => {
                     format!("duration_since_{duration_unit:?}").to_lowercase()
                 }
             },
             title: conversion_result.converted_text.clone(),
             subtitle: match &conversion_result.format {
-                ConversionFormat::Rfc3339Utc => String::from("RFC3339 - UTC"),
-                ConversionFormat::Rfc3339Local => String::from("RFC3339 - Local"),
-                ConversionFormat::EpochMillis => String::from("Epoch Millis"),
-                ConversionFormat::DurationSince => String::from("Duration"),
-                ConversionFormat::DurationSinceUnits(duration_unit) => {
+                OutputFormat::Utc => String::from("RFC3339 - UTC"),
+                OutputFormat::Zoned => String::from("RFC3339 - Zoned"),
+                OutputFormat::Seconds => String::from("Epoch Seconds"),
+                OutputFormat::Millis => String::from("Epoch Millis"),
+                OutputFormat::Nanos => String::from("Epoch Nanoseconds"),
+                OutputFormat::Duration => String::from("Duration"),
+                OutputFormat::DurationSinceUnits(duration_unit) => {
                     format!("Duration {duration_unit:?}")
                 }
             },
