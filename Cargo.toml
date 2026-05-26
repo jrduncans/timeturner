@@ -18,7 +18,7 @@ chrono = "0.4.44"
 chrono-tz = "0.10.4"
 clap = { version = "4.6.1", features = ["derive"] }
 serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.149"
+serde_json = "1.0.150"
 dateparser = "0.3.1"
 humantime = "2.3.0"
 speedate = "0.17.0"
