@@ -8,6 +8,10 @@ To install with **Homebrew**:
 
 `brew install jrduncans/timeturner/timeturner`
 
+To install with **mise**:
+
+`mise use -g github:jrduncans/timeturner`
+
 To install with **cargo**:
 
 `cargo install timeturner`
